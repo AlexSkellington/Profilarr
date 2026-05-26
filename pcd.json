@@ -1,15 +1,27 @@
 {
-  "name": "alejandro-clean-pcd",
-  "version": "1.0.0",
-  "description": "Alejandro's clean personal Profilarr database. No curated profiles or custom formats included.",
-  "arr_types": [
-    "radarr",
-    "sonarr"
-  ],
-  "dependencies": {
-    "https://github.com/Dictionarry-Hub/schema": "1.1.0"
-  },
-  "profilarr": {
-    "minimum_version": "2.0.0"
-  }
+    "name":  "Alex_C.T Smart Plex",
+    "version":  "1.0.0",
+    "description":  "Alex_C.T generated Smart Plex managed library for Profilarr v2.",
+    "arr_types":  [
+                      "radarr",
+                      "sonarr"
+                  ],
+    "dependencies":  {
+                         "https://github.com/Dictionarry-Hub/schema":  "1.1.0"
+                     },
+    "authors":  [
+                    {
+                        "name":  "Alex_C.T"
+                    }
+                ],
+    "license":  "private",
+    "repository":  "",
+    "tags":  [
+                 "smart-plex",
+                 "radarr",
+                 "sonarr"
+             ],
+    "profilarr":  {
+                      "minimum_version":  "2.0.0"
+                  }
 }
