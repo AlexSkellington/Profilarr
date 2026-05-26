@@ -1,0 +1,27 @@
+{
+    "name":  "Alex_C.T Smart Plex",
+    "version":  "1.0.0",
+    "description":  "Alex_C.T generated Smart Plex managed library for Profilarr v2.",
+    "arr_types":  [
+                      "radarr",
+                      "sonarr"
+                  ],
+    "dependencies":  {
+                         "schema":  "^1.0.0"
+                     },
+    "authors":  [
+                    {
+                        "name":  "Alex_C.T"
+                    }
+                ],
+    "license":  "private",
+    "repository":  "https://github.com/AlexSkellington/Profilarr",
+    "tags":  [
+                 "smart-plex",
+                 "radarr",
+                 "sonarr"
+             ],
+    "profilarr":  {
+                      "minimum_version":  "2.0.0"
+                  }
+}
