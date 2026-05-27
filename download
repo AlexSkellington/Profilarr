@@ -1,5 +1,5 @@
-# OS/editor noise
+# Local files
 .DS_Store
-Thumbs.db
-*.tmp
 *.bak
+*.tmp
+node_modules/
