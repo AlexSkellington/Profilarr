@@ -10,19 +10,26 @@ This database contains Alejandro's curated quality profiles, custom formats, reg
 - Curated Sonarr quality profiles
 - Custom formats and regular expressions
 - English and Spanish language preference logic
-- Codec, source, audio, HDR/4K, and blocking rules
+- Codec, source, audio, HDR/4K, edition, and blocking rules
+- Micro-encode size guards
 - Plex-focused naming settings
 - Radarr and Sonarr media settings
 - Radarr and Sonarr quality definitions
+- Usenet-first delay profile
 
 ## Files
 
 ```text
 pcd.json
-ops/1.smart-plex-managed-library.sql       # Profiles, custom formats, scoring, tags, regex rules
-ops/2.smart-plex-media-management.sql      # Naming settings, media settings, quality definitions
-tweaks/                                    # Optional local SQL tweaks/variants
+ops/1.Smart-Managed-Library.sql              # Profiles, custom formats, scoring, tags, regex rules
+ops/2.Smart-Plex-Media-Management.sql        # Naming settings, media settings, quality definitions
+ops/3.Smart-Plex-Delay-Profile.sql           # Usenet-first delay profile
+ops/4.Smart-Plex-Micro-Encode-Guards.sql     # Extra size-based micro-encode penalties
+tweaks/                                       # Optional local SQL tweaks/variants
+validate_manifest.py                         # Lightweight repo/manifest sanity checks
 ```
+
+> GitHub paths are case-sensitive. Keep the filenames above exactly as written.
 
 ## How to use
 
@@ -33,7 +40,8 @@ tweaks/                                    # Optional local SQL tweaks/variants
    - **Media Management → Naming Settings**
    - **Media Management → Media Settings**
    - **Media Management → Quality Definitions**
-5. Sync the desired media-management configs to the correct Radarr/Sonarr instances.
+   - **Delay Profiles**
+5. Sync the desired media-management configs, delay profile, and quality profiles to the correct Radarr/Sonarr instances.
 
 ## Recommended workflow
 
@@ -43,7 +51,7 @@ Avoid manually editing the same managed profiles or media-management configs dir
 
 ## Included media-management settings
 
-This repo includes `ops/2.smart-plex-media-management.sql`, which adds the Media Management section in Profilarr:
+`ops/2.Smart-Plex-Media-Management.sql` adds the Media Management section in Profilarr:
 
 - Radarr Naming Settings using Alejandro's current movie format and TMDb folder format
 - Sonarr Naming Settings using Alejandro's current standard, daily, anime, season folder, Smart Replace, and Prefixed Range settings
@@ -53,3 +61,9 @@ This repo includes `ops/2.smart-plex-media-management.sql`, which adds the Media
 - Sonarr Quality Definitions reconstructed from the current Sonarr MiB/h and GiB/h display
 
 Note: the pasted Sonarr settings did not include a separate Series Folder Format value. The required Profilarr field is set to `{Series TitleYear}` in the SQL file.
+
+## Micro-encode guards
+
+`ops/4.Smart-Plex-Micro-Encode-Guards.sql` adds extra custom formats that penalize suspiciously tiny 1080p and 4K releases.
+
+These are intentionally separate from the main generated SQL so they can be tuned without touching the generated profile export. They are a second safety layer on top of the Radarr/Sonarr quality definitions.

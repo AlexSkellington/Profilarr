@@ -1,6 +1,6 @@
 {
   "name": "Alex_C.T",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Alejandro's Smart Plex managed library database for Radarr and Sonarr, including profiles, custom formats, and media-management settings.",
   "arr_types": [
     "radarr",
