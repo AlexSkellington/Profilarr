@@ -1,5 +1,0 @@
-# Local files
-.DS_Store
-*.bak
-*.tmp
-node_modules/
