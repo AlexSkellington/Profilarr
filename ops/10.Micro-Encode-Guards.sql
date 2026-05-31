@@ -1,27 +1,20 @@
--- Alex_C.T Smart Plex micro-encode guard Profilarr v2 PCD operations.
--- Adds size-based custom formats that penalize suspiciously tiny 1080p/4K releases.
--- Import after ops/1.Smart-Managed-Library.sql and ops/2.Smart-Plex-Media-Management.sql.
+-- Alex_C.T Smart Plex modular Profilarr v2 PCD operations.
+-- 10: Size-based micro-encode guards.
+-- Adds extra penalties for suspiciously tiny 1080p/4K releases.
+-- Import last, after the profiles exist.
 --
--- Notes:
--- - These guards use total release size, not true bitrate.
--- - Quality Definitions remain the main bitrate/MB-per-minute control layer.
--- - These custom formats are a second safety rail for releases that look correct by title
---   but are suspiciously small for the target quality.
+-- These use total release size, not true bitrate. Quality Definitions remain
+-- the main MB/min guardrail layer.
 
 INSERT OR REPLACE INTO tags (name) VALUES ('Size Guards');
 INSERT OR REPLACE INTO tags (name) VALUES ('Micro Encode');
 INSERT OR REPLACE INTO tags (name) VALUES ('Bitrate Guard');
-
--- ---------------------------------------------------------------------------
--- Regex markers used with size conditions.
--- ---------------------------------------------------------------------------
 
 INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES (
   'Size Guard: 1080p Only Marker',
   '(?i)^(?=.*\b1080p\b)(?!.*\b(?:2160p|4k)\b).*$',
   'Matches 1080p releases while excluding true 2160p/4K releases.'
 );
-
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Size Guard: 1080p Only Marker', 'Size Guards');
 
 INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES (
@@ -29,15 +22,9 @@ INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES (
   '(?i)^(?=.*\b(?:2160p|4k)\b).*$',
   'Matches releases tagged as 2160p or 4K.'
 );
-
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Size Guard: 4K Marker', 'Size Guards');
 
--- ---------------------------------------------------------------------------
--- Custom formats.
--- Sizes are stored in bytes. Profilarr converts them to GB for Radarr/Sonarr.
--- ---------------------------------------------------------------------------
-
--- Radarr/movie-oriented guard: 1080p movie under 2 GiB.
+-- 1080p movie under 2 GiB.
 INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES (
   'Size Guard: 1080p Movie Micro Encode',
   'Penalty for 1080p movie releases under 2 GiB. Helps avoid starved x265/AV1 micro-encodes that have the right keywords but poor visual quality.',
@@ -51,7 +38,7 @@ INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, r
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Size Guard: 1080p Movie Micro Encode', 'size <= 2 GiB', 'size', 'all', 0, 1);
 INSERT OR REPLACE INTO condition_sizes (custom_format_name, condition_name, min_bytes, max_bytes) VALUES ('Size Guard: 1080p Movie Micro Encode', 'size <= 2 GiB', NULL, 2147483648);
 
--- Radarr/movie-oriented guard: 4K movie under 7 GiB.
+-- 4K movie under 7 GiB.
 INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES (
   'Size Guard: 4K Movie Micro Encode',
   'Penalty for 2160p/4K movie releases under 7 GiB. Keeps compact 4K usable while discouraging very starved 4K encodes.',
@@ -65,7 +52,7 @@ INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, r
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Size Guard: 4K Movie Micro Encode', 'size <= 7 GiB', 'size', 'all', 0, 1);
 INSERT OR REPLACE INTO condition_sizes (custom_format_name, condition_name, min_bytes, max_bytes) VALUES ('Size Guard: 4K Movie Micro Encode', 'size <= 7 GiB', NULL, 7516192768);
 
--- Harder Radarr/movie-oriented guard: 4K movie under 4 GiB.
+-- 4K movie under 4 GiB.
 INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES (
   'Size Guard: 4K Movie Tiny Encode',
   'Heavy penalty for 2160p/4K movie releases under 4 GiB. These are usually too starved for the curated 4K path.',
@@ -79,7 +66,7 @@ INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, r
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Size Guard: 4K Movie Tiny Encode', 'size <= 4 GiB', 'size', 'all', 0, 1);
 INSERT OR REPLACE INTO condition_sizes (custom_format_name, condition_name, min_bytes, max_bytes) VALUES ('Size Guard: 4K Movie Tiny Encode', 'size <= 4 GiB', NULL, 4294967296);
 
--- Sonarr/episode-oriented guard: individual 1080p release under 300 MiB.
+-- 1080p episode under 300 MiB.
 INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES (
   'Size Guard: 1080p Episode Tiny Encode',
   'Light penalty for 1080p episode releases under 300 MiB. Kept mild because TV episode runtimes vary and season packs should not be judged like movies.',
@@ -92,7 +79,7 @@ INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, r
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Size Guard: 1080p Episode Tiny Encode', 'size <= 300 MiB', 'size', 'all', 0, 1);
 INSERT OR REPLACE INTO condition_sizes (custom_format_name, condition_name, min_bytes, max_bytes) VALUES ('Size Guard: 1080p Episode Tiny Encode', 'size <= 300 MiB', NULL, 314572800);
 
--- Sonarr/episode-oriented guard: individual 4K release under 800 MiB.
+-- 4K episode under 800 MiB.
 INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES (
   'Size Guard: 4K Episode Tiny Encode',
   'Penalty for 2160p/4K episode releases under 800 MiB. This catches very tiny 4K TV encodes while avoiding a hard block for normal episode-length variation.',
@@ -106,13 +93,9 @@ INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, r
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Size Guard: 4K Episode Tiny Encode', 'size <= 800 MiB', 'size', 'all', 0, 1);
 INSERT OR REPLACE INTO condition_sizes (custom_format_name, condition_name, min_bytes, max_bytes) VALUES ('Size Guard: 4K Episode Tiny Encode', 'size <= 800 MiB', NULL, 838860800);
 
--- ---------------------------------------------------------------------------
--- Profile scoring.
--- ---------------------------------------------------------------------------
-
 -- Radarr primary 1080p/2160p movie profile.
 INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - 1080p-2160p Plex Movies', 'Size Guard: 1080p Movie Micro Encode', 'all', -2500);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - 1080p-2160p Plex Movies', 'Size Guard: 4K Movie Micro Encode', 'all', -6000);
+INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - 1080p-2160p Plex Movies', 'Size Guard: 4K Movie Micro Encode', 'all', -4000);
 INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - 1080p-2160p Plex Movies', 'Size Guard: 4K Movie Tiny Encode', 'all', -50000);
 
 -- Radarr strict 4K movie profile.

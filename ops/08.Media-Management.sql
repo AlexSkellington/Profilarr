@@ -1,6 +1,7 @@
--- Alex_C.T Smart Plex media-management Profilarr v2 PCD operations.
--- Adds Naming Settings, Media Settings, and exact Quality Definitions captured from Alejandro's Radarr/Sonarr setup.
--- Upload this as ops/2.smart-plex-media-management.sql after ops/1.smart-plex-managed-library.sql.
+-- Alex_C.T Smart Plex modular Profilarr v2 PCD operations.
+-- 08: Naming settings, media settings, and quality definitions.
+-- Derived from the previous ops/2.Smart-Plex-Media-Management.sql.
+-- Requires 01.Core-Tags-Languages-Qualities.sql.
 
 INSERT OR REPLACE INTO tags (name) VALUES ('Media Management');
 INSERT OR REPLACE INTO tags (name) VALUES ('Naming');

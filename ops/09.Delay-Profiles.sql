@@ -1,6 +1,6 @@
--- Alex_C.T Smart Plex delay-profile Profilarr v2 PCD operations.
--- Adds a conservative Usenet-first delay profile for Radarr/Sonarr sync.
--- Upload this as ops/3.smart-plex-delay-profile.sql after ops/1 and ops/2.
+-- Alex_C.T Smart Plex modular Profilarr v2 PCD operations.
+-- 09: Usenet-first delay profile.
+-- Requires no previous ops files, but import after the core/profile ops for readability.
 
 -- Profilarr's delay_profiles entity is shared and can be synced to Radarr/Sonarr instances.
 -- This profile prefers Usenet immediately and gives torrents a 60-minute delay as fallback.

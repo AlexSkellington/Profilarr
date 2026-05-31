@@ -1,0 +1,57 @@
+-- Alex_C.T Smart Plex modular Profilarr v2 PCD operations.
+-- 03: Codec, HDR, and audio regular expressions.
+-- Requires 01.Core-Tags-Languages-Qualities.sql.
+
+INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Codec: AV1 Preferred', '(?i)\bav1\b', 'Second-place codec preference. AV1 is efficient, but the managed ladder keeps it behind x265/HEVC for broader client compatibility.');
+INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Codec: AV1 Preferred', 'Codec');
+INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Codec: AV1 Preferred', 'Scoring');
+INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Codec: VVC-x266 Future', '(?i)\b(?:vvc|h[ ._-]?266|x[ ._-]?266)\b', 'Third-place codec preference. H.266, x266, and VVC are recognized, but they stay below x265 and AV1 in every managed profile.');
+INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Codec: VVC-x266 Future', 'Codec');
+INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Codec: HEVC-x265 Preferred', '(?i)\b(?:hevc|h[ ._-]?265|x[ ._-]?265)\b', 'Primary codec preference across the managed profiles. x265, H.265, and HEVC are scored highest for the best balance of quality, size, and playback compatibility.');
+INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Codec: HEVC-x265 Preferred', 'Codec');
+INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Codec: HEVC-x265 Preferred', 'Scoring');
+INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Codec: x264-H264 Fallback or Penalty', '(?i)\b(?:avc|[xh][ ._-]?264)\b', 'Compatibility codec detector. In the smart movie profiles this is now a strong negative safety rail so x264 cannot replace an existing x265/AV1/VVC or compact 4K release. The looser catalog profile can still use it manually for hard-to-find movies.');
+INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Codec: x264-H264 Fallback or Penalty', 'Codec');
+INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Codec: x264-H264 Fallback or Penalty', 'Blocking');
+INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Codec: x264-H264 Fallback or Penalty', 'Scoring');
+INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('HDR: Base HDR Bonus', '(?i)(?:\bhdr\b|\bhdr10\b|\bhdr10plus\b|\bhdr10\+)', 'Base HDR bonus. Keeps HDR above SDR, while still letting the more specific Dolby Vision plus HDR and HDR10+ combinations rise higher.');
+INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('HDR: Base HDR Bonus', 'HDR / 4K');
+INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('HDR: Base HDR Bonus', 'Scoring');
+INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('HDR: HDR10 Bonus', '(?i)\bhdr10\b(?!\+)', 'Extra HDR score for HDR10. This sits above generic HDR but below Dolby Vision paired with HDR and below HDR10+.');
+INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('HDR: HDR10 Bonus', 'HDR / 4K');
+INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('HDR: HDR10 Bonus', 'Scoring');
+INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('HDR: HDR10+ Bonus', '(?i)(?:\bhdr10plus\b|\bhdr10\+)', 'Top non-Dolby-Vision HDR bonus for HDR10+ and HDR10 Plus tags. Combined with Dolby Vision, this becomes the strongest HDR path.');
+INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('HDR: HDR10+ Bonus', 'HDR / 4K');
+INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('HDR: HDR10+ Bonus', 'Scoring');
+INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('HDR: Dolby Vision + HDR Bonus', '(?i)^(?=.*\b(?:dovi|dolby[ ._-]?vision|dv)\b)(?=.*(?:\bhdr\b|\bhdr10\b|\bhdr10plus\b|\bhdr10\+)).*$', 'Rewards Dolby Vision only when HDR, HDR10, or HDR10+ is also present. This builds the preferred Dolby Vision plus HDR ladders without overvaluing DV-only releases.');
+INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('HDR: Dolby Vision + HDR Bonus', 'HDR / 4K');
+INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('HDR: Dolby Vision + HDR Bonus', 'Scoring');
+INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('HDR: Penalize SDR When HDR Expected', '(?i)^(?=.*\b(?:1080p|2160p|4k|uhd)\b)(?=.*\b(?:x265|h[ ._-]?265|hevc|av1|x266|h[ ._-]?266|vvc)\b)(?!.*(?:\bhdr\b|\bhdr10\b|\bhdr10plus\b|\bhdr10\+|\bdovi\b|\bdv\b|dolby[ ._-]?vision)).*$', 'Visual-protection penalty for efficient-codec 1080p/2160p releases that do not advertise HDR, HDR10, HDR10+, DoVi, DV, or Dolby Vision. Movies use this strongly to stop SDR replacing HDR; Sonarr uses a lighter version because HDR is less common on shows.');
+INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('HDR: Penalize SDR When HDR Expected', 'HDR / 4K');
+INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('HDR: Dolby Vision Only Fallback', '(?i)^(?=.*\b(?:dovi|dolby[ ._-]?vision|dv)\b)(?!.*(?:\bhdr\b|\bhdr10\b|\bhdr10plus\b|\bhdr10\+)).*$', 'Small Dolby Vision-only fallback score. DV-only releases stay above SDR when necessary, but below every Dolby Vision plus HDR combination.');
+INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('HDR: Dolby Vision Only Fallback', 'HDR / 4K');
+INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('HDR: Dolby Vision Only Fallback', 'Scoring');
+INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Audio: 5.1 Surround Preferred', '(?i)\b(?:5[ ._-]?1|6ch|5\.1ch)\b', 'Primary surround-audio bonus for 5.1, 6-channel, and 5.1ch tags. This is the main compatibility target for a Plex setup built around a 5.1-capable soundbar.');
+INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Audio: 5.1 Surround Preferred', 'Audio');
+INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Audio: 5.1 Surround Preferred', 'Scoring');
+INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Audio: Atmos Bonus', '(?i)\b(?:dolby[ ._-]?atmos|ddp[ ._-]?atmos|ec3[ ._-]?joc|atmos)\b', 'Top audio bonus for Dolby Atmos, DDP Atmos, EC3 JOC, and Atmos tags. Atmos is preferred when available because it still rides on a practical Dolby Digital Plus playback path.');
+INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Audio: Atmos Bonus', 'Audio');
+INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Audio: Atmos Bonus', 'Scoring');
+INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Audio: EAC3-AC3 Preferred', '(?i)\b(?:eac3|e-ac-3|ddp|dd\+|ac3|ac-3|dolby[ ._-]?digital[ ._-]?plus|dolby[ ._-]?digital)\b', 'Preferred Dolby audio-format bonus for EAC3, DDP, DD+, AC3, and Dolby Digital tags. These formats are highly compatible for Plex, eARC, and streaming-style playback.');
+INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Audio: EAC3-AC3 Preferred', 'Audio');
+INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Audio: EAC3-AC3 Preferred', 'Scoring');
+INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Audio: 6.1 Bonus', '(?i)\b(?:6[ ._-]?1|7ch|6\.1ch)\b', 'Secondary channel-layout bonus for 6.1 audio. It stays below the main 5.1 and Dolby-format preferences, but above 7.1 and stereo in the fallback ladder.');
+INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Audio: 6.1 Bonus', 'Audio');
+INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Audio: 6.1 Bonus', 'Scoring');
+INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Audio: 7.1 Bonus', '(?i)\b(?:7[ ._-]?1|8ch|7\.1ch)\b', 'Smaller channel-layout bonus for 7.1 audio. It remains below the 5.1-first compatibility target and below 6.1 in the current managed fallback order.');
+INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Audio: 7.1 Bonus', 'Audio');
+INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Audio: 7.1 Bonus', 'Scoring');
+INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Audio: AAC Fallback Marker', '(?i)\baac\b', 'Lowest acceptable audio-codec lane. AAC remains allowed so weak fallback releases can still download, but it sits behind EAC3, AC3, DDP, and Atmos once those exist.');
+INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Audio: AAC Fallback Marker', 'Audio');
+INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Audio: AAC Fallback Marker', 'Scoring');
+INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Audio: Stereo-2.0 Penalty', '(?i)\b(?:1[ ._-]?0|2[ ._-]?(?:0|1)|1ch|2ch|1\.0ch|2\.0ch|2\.1ch|stereo|mono|dual[ ._-]?mono)\b', 'Bottom audio floor for stereo-style tags such as 2.0, 2.1, stereo, mono, and dual mono. These releases stay allowed at the minimum acceptable floor, while surround formats score higher.');
+INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Audio: Stereo-2.0 Penalty', 'Audio');
+INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Audio: Stereo-2.0 Penalty', 'Blocking');
+INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Audio: Lossless Size Penalty', '(?i)\b(?:truehd|true[ ._-]?hd|dts[ ._-]?hd|dts[ ._-]?ma|dts[ ._-]?hd[ ._-]?ma|flac|pcm|lpcm)\b', 'Small space-awareness penalty for TrueHD, DTS-HD MA, FLAC, PCM, and LPCM. It is not a hard block, but it keeps practical EAC3/AC3 5.1 releases from losing to larger lossless-audio releases only because of audio size.');
+INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Audio: Lossless Size Penalty', 'Audio');
+INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Audio: Lossless Size Penalty', 'Blocking');

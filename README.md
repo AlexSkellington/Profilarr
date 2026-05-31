@@ -1,69 +1,64 @@
 # Alejandro Smart Plex Profilarr PCD
 
-A personal Profilarr-compliant database for Radarr and Sonarr, built for Alejandro's Smart Plex managed library setup.
+A personal modular Profilarr-compliant database for Radarr and Sonarr, built for Alejandro's Smart Plex managed library setup.
 
-This database contains Alejandro's curated quality profiles, custom formats, regular expressions, tags, scoring logic, and media-management settings. It is intended to be managed in Profilarr as the source-of-truth and then synced into Radarr and Sonarr.
+This database contains curated quality profiles, custom formats, regular expressions, tags, scoring logic, media-management settings, quality definitions, a delay profile, and size-based micro-encode guards.
 
-## What this database includes
+## Import order
 
-- Curated Radarr quality profiles
-- Curated Sonarr quality profiles
-- Custom formats and regular expressions
-- English and Spanish language preference logic
-- Codec, source, audio, HDR/4K, edition, and blocking rules
-- Micro-encode size guards
-- Plex-focused naming settings
-- Radarr and Sonarr media settings
-- Radarr and Sonarr quality definitions
-- Usenet-first delay profile
-
-## Files
+The files in `ops/` are numbered because dependency order matters:
 
 ```text
-pcd.json
-ops/1.Smart-Managed-Library.sql              # Profiles, custom formats, scoring, tags, regex rules
-ops/2.Smart-Plex-Media-Management.sql        # Naming settings, media settings, quality definitions
-ops/3.Smart-Plex-Delay-Profile.sql           # Usenet-first delay profile
-ops/4.Smart-Plex-Micro-Encode-Guards.sql     # Extra size-based micro-encode penalties
-tweaks/                                       # Optional local SQL tweaks/variants
-validate_manifest.py                         # Lightweight repo/manifest sanity checks
+ops/01.Core-Tags-Languages-Qualities.sql
+ops/02.Regular-Expressions-Language-Subtitles.sql
+ops/03.Regular-Expressions-Codecs-HDR-Audio.sql
+ops/04.Regular-Expressions-Resolution-Source-Editions.sql
+ops/05.Custom-Formats.sql
+ops/06.Radarr-Movie-Profiles.sql
+ops/07.Sonarr-Series-Profiles.sql
+ops/08.Media-Management.sql
+ops/09.Delay-Profiles.sql
+ops/10.Micro-Encode-Guards.sql
 ```
 
-> GitHub paths are case-sensitive. Keep the filenames above exactly as written.
+GitHub paths are case-sensitive. Keep these filenames exactly as written.
 
-## How to use
+## What each file does
 
-1. Upload or commit these files to your GitHub PCD repository.
-2. In Profilarr, go to **Databases** and update/relink the `Alex_C.T` database.
-3. Rebuild/update the database from GitHub if Profilarr does not refresh automatically.
-4. Check:
-   - **Media Management → Naming Settings**
-   - **Media Management → Media Settings**
-   - **Media Management → Quality Definitions**
-   - **Delay Profiles**
-5. Sync the desired media-management configs, delay profile, and quality profiles to the correct Radarr/Sonarr instances.
+- `01.Core-Tags-Languages-Qualities.sql`: base tags, languages, and quality names.
+- `02.Regular-Expressions-Language-Subtitles.sql`: EN/ES/Latino language logic and subtitle rules.
+- `03.Regular-Expressions-Codecs-HDR-Audio.sql`: HEVC/AV1/VVC/x264, HDR/DV, and audio rules.
+- `04.Regular-Expressions-Resolution-Source-Editions.sql`: resolution-specific source rules, 4K gates, editions, and release fixes.
+- `05.Custom-Formats.sql`: custom format records, tags, conditions, and regex bindings.
+- `06.Radarr-Movie-Profiles.sql`: Radarr movie profiles and scoring.
+- `07.Sonarr-Series-Profiles.sql`: Sonarr series profiles and scoring.
+- `08.Media-Management.sql`: Radarr/Sonarr naming, media settings, and quality definitions.
+- `09.Delay-Profiles.sql`: Usenet-first delay profile.
+- `10.Micro-Encode-Guards.sql`: size-based penalties for suspiciously tiny releases.
 
-## Recommended workflow
+## Migration from the old layout
 
-Use this database as your personal source-of-truth. Make future changes inside Profilarr when possible, then publish/export the resulting operations back into this repo so the setup stays reproducible.
+Delete or move these old files from `ops/` so the repo stays clean:
 
-Avoid manually editing the same managed profiles or media-management configs directly in Radarr/Sonarr unless you intentionally want those changes outside Profilarr management.
+```text
+ops/1.Smart-Managed-Library.sql
+ops/2.Smart-Plex-Media-Management.sql
+ops/3.Smart-Plex-Delay-Profile.sql
+ops/4.Smart-Plex-Micro-Encode-Guards.sql
+```
 
-## Included media-management settings
+Then add the new numbered files.
 
-`ops/2.Smart-Plex-Media-Management.sql` adds the Media Management section in Profilarr:
+## Recommended Profilarr workflow
 
-- Radarr Naming Settings using Alejandro's current movie format and TMDb folder format
-- Sonarr Naming Settings using Alejandro's current standard, daily, anime, season folder, Smart Replace, and Prefixed Range settings
-- Radarr Media Settings
-- Sonarr Media Settings
-- Radarr Quality Definitions matching the current Radarr MiB/min values
-- Sonarr Quality Definitions reconstructed from the current Sonarr MiB/h and GiB/h display
+Since this is a full modular restructure:
 
-Note: the pasted Sonarr settings did not include a separate Series Folder Format value. The required Profilarr field is set to `{Series TitleYear}` in the SQL file.
+1. Unlink/remove the old `Alex_C.T` database in Profilarr.
+2. Push this modular repo layout to GitHub.
+3. Link the repo again in Profilarr.
+4. Rebuild/update the database from GitHub.
+5. Sync the desired profiles/settings to Radarr and Sonarr.
 
-## Micro-encode guards
+## Notes
 
-`ops/4.Smart-Plex-Micro-Encode-Guards.sql` adds extra custom formats that penalize suspiciously tiny 1080p and 4K releases.
-
-These are intentionally separate from the main generated SQL so they can be tuned without touching the generated profile export. They are a second safety layer on top of the Radarr/Sonarr quality definitions.
+The micro-encode guards use total release size, not true bitrate. Quality Definitions remain the main MB/min guardrail layer.
