@@ -45,6 +45,7 @@ INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, cus
 INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - 1080p-2160p Plex Movies', 'Edition: Final Cut', 'all', 150);
 INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - 1080p-2160p Plex Movies', 'Codec: VVC-x266 Future', 'all', 2500);
 INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - 1080p-2160p Plex Movies', 'Codec: HEVC-x265 Preferred', 'all', 3500);
+INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - 1080p-2160p Plex Movies', 'Video: 10-bit SDR / Main 10 Fallback', 'all', 650);
 INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - 1080p-2160p Plex Movies', 'Subtitles: Block Hardcoded-Burned-In', 'all', -50000);
 INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - 1080p-2160p Plex Movies', 'Codec: AV1 Preferred', 'all', 3000);
 INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - 1080p-2160p Plex Movies', 'HDR: Base HDR Bonus', 'all', 750);
@@ -117,6 +118,7 @@ INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, cus
 INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - 4K Plex Movies', 'Codec: AV1 Preferred', 'all', 3000);
 INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - 4K Plex Movies', 'Subtitles: Block Hardcoded-Burned-In', 'all', -50000);
 INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - 4K Plex Movies', 'Codec: HEVC-x265 Preferred', 'all', 3500);
+INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - 4K Plex Movies', 'Video: 10-bit SDR / Main 10 Fallback', 'all', 650);
 INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - 4K Plex Movies', 'HDR: Base HDR Bonus', 'all', 900);
 INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - 4K Plex Movies', 'Source: Block Remux-Raw Disk', 'all', -50000);
 INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - 4K Plex Movies', 'Codec: x264-H264 Fallback or Penalty', 'all', -10000);
@@ -203,6 +205,7 @@ INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, cus
 INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Plex Movies', 'Edition: New Transfer', 'all', 250);
 INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Plex Movies', 'Edition: Director''s Cut', 'all', 150);
 INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Plex Movies', 'Codec: HEVC-x265 Preferred', 'all', 3500);
+INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Plex Movies', 'Video: 10-bit SDR / Main 10 Fallback', 'all', 450);
 INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Plex Movies', 'Source: Block Remux-Raw Disk', 'all', -50000);
 INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Plex Movies', 'Codec: AV1 Preferred', 'all', 3000);
 INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Plex Movies', 'Codec: VVC-x266 Future', 'all', 2500);

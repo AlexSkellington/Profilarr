@@ -68,6 +68,12 @@ INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES 
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Codec: HEVC-x265 Preferred', 'Scoring');
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Codec: HEVC-x265 Preferred', 'Codec: HEVC-x265 Preferred', 'release_title', 'all', 0, 1);
 INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('Codec: HEVC-x265 Preferred', 'Codec: HEVC-x265 Preferred', 'Codec: HEVC-x265 Preferred');
+INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('Video: 10-bit SDR / Main 10 Fallback', 'Soft fallback score for explicit 10-bit SDR / HEVC Main 10 style releases when HDR/Dolby Vision is not advertised. This helps profiles prefer 10-bit by itself after true HDR/DV options, without allowing weak sources to beat the BluRay target ladder.', 0);
+INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Video: 10-bit SDR / Main 10 Fallback', 'Codec');
+INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Video: 10-bit SDR / Main 10 Fallback', 'HDR / 4K');
+INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Video: 10-bit SDR / Main 10 Fallback', 'Scoring');
+INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Video: 10-bit SDR / Main 10 Fallback', 'Video: 10-bit SDR / Main 10 Fallback', 'release_title', 'all', 0, 1);
+INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('Video: 10-bit SDR / Main 10 Fallback', 'Video: 10-bit SDR / Main 10 Fallback', 'Video: 10-bit SDR / Main 10 Fallback');
 INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('Codec: x264-H264 Fallback or Penalty', 'Compatibility codec detector. In the smart movie profiles this is now a strong negative safety rail so x264 cannot replace an existing x265/AV1/VVC or compact 4K release. The looser catalog profile can still use it manually for hard-to-find movies.', 0);
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Codec: x264-H264 Fallback or Penalty', 'Codec');
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Codec: x264-H264 Fallback or Penalty', 'Blocking');
