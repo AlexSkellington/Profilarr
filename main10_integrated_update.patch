@@ -1,0 +1,74 @@
+diff --git a/ops/03.Regular-Expressions-Codecs-HDR-Audio.sql b/ops/03.Regular-Expressions-Codecs-HDR-Audio.sql
+index 2b18c4d..main10 100644
+--- a/ops/03.Regular-Expressions-Codecs-HDR-Audio.sql
++++ b/ops/03.Regular-Expressions-Codecs-HDR-Audio.sql
+@@
+ INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Codec: HEVC-x265 Preferred', '(?i)\b(?:hevc|h[ ._-]?265|x[ ._-]?265)\b', 'Primary codec preference across the managed profiles. x265, H.265, and HEVC are scored highest for the best balance of quality, size, and playback compatibility.');
+ INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Codec: HEVC-x265 Preferred', 'Codec');
+ INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Codec: HEVC-x265 Preferred', 'Scoring');
++INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Video: 10-bit SDR / Main 10 Fallback', '(?i)^(?=.*\b(?:x265|h[ ._-]?265|hevc|av1|x266|h[ ._-]?266|vvc)\b)(?=.*\b(?:10[ ._-]?bit|10b|main[ ._-]?10|yuv420p10le)\b)(?!.*(?:\bhdr\b|\bhdr10\b|\bhdr10plus\b|\bhdr10\+|\bdovi\b|\bdv\b|dolby[ ._-]?vision)).*$', 'Fallback visual-quality bonus for efficient-codec releases that explicitly advertise 10-bit/Main 10 but do not advertise HDR, HDR10, HDR10+, DoVi, DV, or Dolby Vision. This lets 10-bit SDR sit above plain 8-bit HEVC/x265 while staying below true HDR/Dolby Vision.');
++INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Video: 10-bit SDR / Main 10 Fallback', 'Codec');
++INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Video: 10-bit SDR / Main 10 Fallback', 'HDR / 4K');
++INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Video: 10-bit SDR / Main 10 Fallback', 'Scoring');
+ INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Codec: x264-H264 Fallback or Penalty', '(?i)\b(?:avc|[xh][ ._-]?264)\b', 'Compatibility codec detector. In the smart movie profiles this is now a strong negative safety rail so x264 cannot replace an existing x265/AV1/VVC or compact 4K release. The looser catalog profile can still use it manually for hard-to-find movies.');
+@@
+-INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('HDR: Penalize SDR When HDR Expected', '(?i)^(?=.*\b(?:1080p|2160p|4k|uhd)\b)(?=.*\b(?:x265|h[ ._-]?265|hevc|av1|x266|h[ ._-]?266|vvc)\b)(?!.*(?:\bhdr\b|\bhdr10\b|\bhdr10plus\b|\bhdr10\+|\bdovi\b|\bdv\b|dolby[ ._-]?vision)).*$', 'Visual-protection penalty for efficient-codec 1080p/2160p releases that do not advertise HDR, HDR10, HDR10+, DoVi, DV, or Dolby Vision. Movies use this strongly to stop SDR replacing HDR; Sonarr uses a lighter version because HDR is less common on shows.');
++INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('HDR: Penalize SDR When HDR Expected', '(?i)^(?=.*\b(?:1080p|2160p|4k|uhd)\b)(?=.*\b(?:x265|h[ ._-]?265|hevc|av1|x266|h[ ._-]?266|vvc)\b)(?!.*(?:\bhdr\b|\bhdr10\b|\bhdr10plus\b|\bhdr10\+|\bdovi\b|\bdv\b|dolby[ ._-]?vision|\b(?:10[ ._-]?bit|10b|main[ ._-]?10|yuv420p10le)\b)).*$', 'Visual-protection penalty for efficient-codec 1080p/2160p releases that advertise neither HDR/Dolby Vision nor explicit 10-bit/Main 10. Explicit 10-bit SDR is handled by the Video: 10-bit SDR / Main 10 Fallback custom format.');
+diff --git a/ops/04.Regular-Expressions-Resolution-Source-Editions.sql b/ops/04.Regular-Expressions-Resolution-Source-Editions.sql
+index e5943f4..main10 100644
+--- a/ops/04.Regular-Expressions-Resolution-Source-Editions.sql
++++ b/ops/04.Regular-Expressions-Resolution-Source-Editions.sql
+@@
+-INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('4K Gate: Block Missing HDR', '(?i)^(?=.*\b(?:2160p|4k)\b)(?!.*(?:\bhdr\b|\bhdr10\b|\bhdr10plus\b|\bhdr10\+|\bdovi\b|\bdv\b|dolby[ ._-]?vision)).*$', 'Managed Smart Plex custom format. Matches release-title tokens and applies the profile score assigned in each curated quality profile.');
++INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('4K Gate: Block Missing HDR', '(?i)^(?=.*\b(?:2160p|4k)\b)(?!.*(?:\bhdr\b|\bhdr10\b|\bhdr10plus\b|\bhdr10\+|\bdovi\b|\bdv\b|dolby[ ._-]?vision|\b(?:10[ ._-]?bit|10b|main[ ._-]?10|yuv420p10le)\b)).*$', 'Blocks or heavily penalizes 2160p/4K releases that advertise neither HDR/Dolby Vision nor explicit 10-bit/Main 10. This preserves HDR-first behavior while allowing 10-bit SDR as a controlled fallback.');
+diff --git a/ops/05.Custom-Formats.sql b/ops/05.Custom-Formats.sql
+index aeb03ad..main10 100644
+--- a/ops/05.Custom-Formats.sql
++++ b/ops/05.Custom-Formats.sql
+@@
+ INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Codec: HEVC-x265 Preferred', 'Codec: HEVC-x265 Preferred', 'release_title', 'all', 0, 1);
+ INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('Codec: HEVC-x265 Preferred', 'Codec: HEVC-x265 Preferred', 'Codec: HEVC-x265 Preferred');
++INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('Video: 10-bit SDR / Main 10 Fallback', 'Soft fallback score for explicit 10-bit SDR / HEVC Main 10 style releases when HDR/Dolby Vision is not advertised. This helps profiles prefer 10-bit by itself after true HDR/DV options, without allowing weak sources to beat the BluRay target ladder.', 0);
++INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Video: 10-bit SDR / Main 10 Fallback', 'Codec');
++INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Video: 10-bit SDR / Main 10 Fallback', 'HDR / 4K');
++INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Video: 10-bit SDR / Main 10 Fallback', 'Scoring');
++INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Video: 10-bit SDR / Main 10 Fallback', 'Video: 10-bit SDR / Main 10 Fallback', 'release_title', 'all', 0, 1);
++INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('Video: 10-bit SDR / Main 10 Fallback', 'Video: 10-bit SDR / Main 10 Fallback', 'Video: 10-bit SDR / Main 10 Fallback');
+ INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('Codec: x264-H264 Fallback or Penalty', 'Compatibility codec detector. In the smart movie profiles this is now a strong negative safety rail so x264 cannot replace an existing x265/AV1/VVC or compact 4K release. The looser catalog profile can still use it manually for hard-to-find movies.', 0);
+diff --git a/ops/06.Radarr-Movie-Profiles.sql b/ops/06.Radarr-Movie-Profiles.sql
+index 82d0a6c..main10 100644
+--- a/ops/06.Radarr-Movie-Profiles.sql
++++ b/ops/06.Radarr-Movie-Profiles.sql
+@@
+ INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - 1080p-2160p Plex Movies', 'Codec: VVC-x266 Future', 'all', 2500);
+ INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - 1080p-2160p Plex Movies', 'Codec: HEVC-x265 Preferred', 'all', 3500);
++INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - 1080p-2160p Plex Movies', 'Video: 10-bit SDR / Main 10 Fallback', 'all', 650);
+ INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - 1080p-2160p Plex Movies', 'Subtitles: Block Hardcoded-Burned-In', 'all', -50000);
+@@
+ INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - 4K Plex Movies', 'Codec: AV1 Preferred', 'all', 3000);
+ INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - 4K Plex Movies', 'Subtitles: Block Hardcoded-Burned-In', 'all', -50000);
+ INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - 4K Plex Movies', 'Codec: HEVC-x265 Preferred', 'all', 3500);
++INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - 4K Plex Movies', 'Video: 10-bit SDR / Main 10 Fallback', 'all', 650);
+ INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - 4K Plex Movies', 'HDR: Base HDR Bonus', 'all', 900);
+@@
+ INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Plex Movies', 'Edition: Director''s Cut', 'all', 150);
+ INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Plex Movies', 'Codec: HEVC-x265 Preferred', 'all', 3500);
++INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Plex Movies', 'Video: 10-bit SDR / Main 10 Fallback', 'all', 450);
+ INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Plex Movies', 'Source: Block Remux-Raw Disk', 'all', -50000);
+diff --git a/ops/07.Sonarr-Series-Profiles.sql b/ops/07.Sonarr-Series-Profiles.sql
+index 8903627..main10 100644
+--- a/ops/07.Sonarr-Series-Profiles.sql
++++ b/ops/07.Sonarr-Series-Profiles.sql
+@@
+ INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - 1080p-2160p Plex Series', 'HDR: Dolby Vision + HDR Bonus', 'all', 800);
+ INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - 1080p-2160p Plex Series', 'Source: Block Remux-Raw Disk', 'all', -50000);
+ INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - 1080p-2160p Plex Series', 'Codec: HEVC-x265 Preferred', 'all', 3500);
++INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - 1080p-2160p Plex Series', 'Video: 10-bit SDR / Main 10 Fallback', 'all', 650);
+ INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - 1080p-2160p Plex Series', 'HDR: Base HDR Bonus', 'all', 750);
+@@
+ INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - 4K Plex Series', 'Codec: HEVC-x265 Preferred', 'all', 3500);
++INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - 4K Plex Series', 'Video: 10-bit SDR / Main 10 Fallback', 'all', 650);
+@@
+ INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Plex Series', 'Codec: HEVC-x265 Preferred', 'all', 3500);
++INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Plex Series', 'Video: 10-bit SDR / Main 10 Fallback', 'all', 450);
+ INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Plex Series', 'Codec: VVC-x266 Future', 'all', 2500);
