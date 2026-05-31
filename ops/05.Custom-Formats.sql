@@ -54,7 +54,7 @@ INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES 
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Subtitles: Block Hardcoded-Burned-In', 'Blocking');
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Subtitles: Block Hardcoded-Burned-In', 'Subtitles: Block Hardcoded-Burned-In', 'release_title', 'all', 0, 1);
 INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('Subtitles: Block Hardcoded-Burned-In', 'Subtitles: Block Hardcoded-Burned-In', 'Subtitles: Block Hardcoded-Burned-In');
-INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('Codec: AV1 Preferred', 'Second-place codec preference. AV1 is efficient, but the managed ladder keeps it behind x265/HEVC for broader client compatibility.', 0);
+INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('Codec: AV1 Preferred', 'Top efficient-codec preference. AV1 is scored slightly above x265/HEVC so it wins ties when quality, source, HDR, audio, and language scoring are otherwise comparable.', 0);
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Codec: AV1 Preferred', 'Codec');
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Codec: AV1 Preferred', 'Scoring');
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Codec: AV1 Preferred', 'Codec: AV1 Preferred', 'release_title', 'all', 0, 1);

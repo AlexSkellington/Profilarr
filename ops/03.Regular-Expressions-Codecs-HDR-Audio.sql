@@ -2,7 +2,7 @@
 -- 03: Codec, HDR, and audio regular expressions.
 -- Requires 01.Core-Tags-Languages-Qualities.sql.
 
-INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Codec: AV1 Preferred', '(?i)\bav1\b', 'Second-place codec preference. AV1 is efficient, but the managed ladder keeps it behind x265/HEVC for broader client compatibility.');
+INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Codec: AV1 Preferred', '(?i)\bav1\b', 'Top efficient-codec preference. AV1 is scored slightly above x265/HEVC so it wins ties when quality, source, HDR, audio, and language scoring are otherwise comparable.');
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Codec: AV1 Preferred', 'Codec');
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Codec: AV1 Preferred', 'Scoring');
 INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Codec: VVC-x266 Future', '(?i)\b(?:vvc|h[ ._-]?266|x[ ._-]?266)\b', 'Third-place codec preference. H.266, x266, and VVC are recognized, but they stay below x265 and AV1 in every managed profile.');
