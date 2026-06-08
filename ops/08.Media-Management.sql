@@ -39,7 +39,10 @@ INSERT OR REPLACE INTO sonarr_naming (name, rename, standard_episode_format, dai
 INSERT OR REPLACE INTO radarr_media_settings (name, propers_repacks, enable_media_info) VALUES ('Alex_CT Smart Plex Radarr Media Settings', 'preferAndUpgrade', 1);
 INSERT OR REPLACE INTO sonarr_media_settings (name, propers_repacks, enable_media_info) VALUES ('Alex_CT Smart Plex Sonarr Media Settings', 'preferAndUpgrade', 1);
 
--- Radarr Quality Definitions: exact MiB/min values from Alejandro's Radarr Quality Definitions screen.
+-- Radarr Quality Definitions: MiB/min.
+-- Bluray-1080p is intentionally constrained to approximately 8-12 GiB for a 120-minute movie:
+-- 68 MiB/min minimum = 7.97 GiB, 85 MiB/min preferred = 9.96 GiB,
+-- 102 MiB/min maximum = 11.95 GiB.
 DELETE FROM radarr_quality_definitions WHERE name = 'Alex_CT Smart Plex Radarr Quality Definitions';
 INSERT OR REPLACE INTO radarr_quality_definitions (name, quality_name, min_size, max_size, preferred_size) VALUES ('Alex_CT Smart Plex Radarr Quality Definitions', 'Unknown', 10, 90, 45);
 INSERT OR REPLACE INTO radarr_quality_definitions (name, quality_name, min_size, max_size, preferred_size) VALUES ('Alex_CT Smart Plex Radarr Quality Definitions', 'WORKPRINT', 0, 30, 10);
@@ -62,7 +65,7 @@ INSERT OR REPLACE INTO radarr_quality_definitions (name, quality_name, min_size,
 INSERT OR REPLACE INTO radarr_quality_definitions (name, quality_name, min_size, max_size, preferred_size) VALUES ('Alex_CT Smart Plex Radarr Quality Definitions', 'HDTV-1080p', 28, 85, 42);
 INSERT OR REPLACE INTO radarr_quality_definitions (name, quality_name, min_size, max_size, preferred_size) VALUES ('Alex_CT Smart Plex Radarr Quality Definitions', 'WEBDL-1080p', 35, 125, 54);
 INSERT OR REPLACE INTO radarr_quality_definitions (name, quality_name, min_size, max_size, preferred_size) VALUES ('Alex_CT Smart Plex Radarr Quality Definitions', 'WEBRip-1080p', 32, 115, 48);
-INSERT OR REPLACE INTO radarr_quality_definitions (name, quality_name, min_size, max_size, preferred_size) VALUES ('Alex_CT Smart Plex Radarr Quality Definitions', 'Bluray-1080p', 40, 150, 62);
+INSERT OR REPLACE INTO radarr_quality_definitions (name, quality_name, min_size, max_size, preferred_size) VALUES ('Alex_CT Smart Plex Radarr Quality Definitions', 'Bluray-1080p', 68, 102, 85);
 INSERT OR REPLACE INTO radarr_quality_definitions (name, quality_name, min_size, max_size, preferred_size) VALUES ('Alex_CT Smart Plex Radarr Quality Definitions', 'Remux-1080p', 60, 180, 95);
 INSERT OR REPLACE INTO radarr_quality_definitions (name, quality_name, min_size, max_size, preferred_size) VALUES ('Alex_CT Smart Plex Radarr Quality Definitions', 'HDTV-2160p', 32, 110, 52);
 INSERT OR REPLACE INTO radarr_quality_definitions (name, quality_name, min_size, max_size, preferred_size) VALUES ('Alex_CT Smart Plex Radarr Quality Definitions', 'WEBDL-2160p', 36, 145, 60);

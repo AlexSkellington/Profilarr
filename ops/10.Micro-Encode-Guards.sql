@@ -24,10 +24,13 @@ INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES (
 );
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Size Guard: 4K Marker', 'Size Guards');
 
--- 1080p movie under 2 GiB.
+-- 1080p movie under 5 GiB.
+-- This is a hard-block score in the primary profile. The runtime-aware
+-- Bluray-1080p Quality Definition in 08.Media-Management.sql remains the
+-- actual 8-12 GiB guardrail for a typical 120-minute Blu-ray movie.
 INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES (
   'Size Guard: 1080p Movie Micro Encode',
-  'Penalty for 1080p movie releases under 2 GiB. Helps avoid starved x265/AV1 micro-encodes that have the right keywords but poor visual quality.',
+  'Hard penalty for 1080p movie releases under 5 GiB. Helps reject starved x265/AV1 micro-encodes that have the right keywords but poor visual quality.',
   0
 );
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Size Guard: 1080p Movie Micro Encode', 'Size Guards');
@@ -35,8 +38,8 @@ INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES 
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Size Guard: 1080p Movie Micro Encode', 'Blocking');
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Size Guard: 1080p Movie Micro Encode', '1080p marker', 'release_title', 'all', 0, 1);
 INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('Size Guard: 1080p Movie Micro Encode', '1080p marker', 'Size Guard: 1080p Only Marker');
-INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Size Guard: 1080p Movie Micro Encode', 'size <= 2 GiB', 'size', 'all', 0, 1);
-INSERT OR REPLACE INTO condition_sizes (custom_format_name, condition_name, min_bytes, max_bytes) VALUES ('Size Guard: 1080p Movie Micro Encode', 'size <= 2 GiB', NULL, 2147483648);
+INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Size Guard: 1080p Movie Micro Encode', 'size <= 5 GiB', 'size', 'all', 0, 1);
+INSERT OR REPLACE INTO condition_sizes (custom_format_name, condition_name, min_bytes, max_bytes) VALUES ('Size Guard: 1080p Movie Micro Encode', 'size <= 5 GiB', NULL, 5368709120);
 
 -- 4K movie under 7 GiB.
 INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES (
@@ -94,7 +97,7 @@ INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type,
 INSERT OR REPLACE INTO condition_sizes (custom_format_name, condition_name, min_bytes, max_bytes) VALUES ('Size Guard: 4K Episode Tiny Encode', 'size <= 800 MiB', NULL, 838860800);
 
 -- Radarr primary 1080p/2160p movie profile.
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - 1080p-2160p Plex Movies', 'Size Guard: 1080p Movie Micro Encode', 'all', -2500);
+INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - 1080p-2160p Plex Movies', 'Size Guard: 1080p Movie Micro Encode', 'all', -50000);
 INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - 1080p-2160p Plex Movies', 'Size Guard: 4K Movie Micro Encode', 'all', -4000);
 INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - 1080p-2160p Plex Movies', 'Size Guard: 4K Movie Tiny Encode', 'all', -50000);
 
@@ -103,7 +106,7 @@ INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, cus
 INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - 4K Plex Movies', 'Size Guard: 4K Movie Tiny Encode', 'all', -50000);
 
 -- Radarr relaxed catalog profile.
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Plex Movies', 'Size Guard: 1080p Movie Micro Encode', 'all', -1000);
+INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Plex Movies', 'Size Guard: 1080p Movie Micro Encode', 'all', -2500);
 
 -- Sonarr primary profile.
 INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - 1080p-2160p Plex Series', 'Size Guard: 1080p Episode Tiny Encode', 'all', -1000);
