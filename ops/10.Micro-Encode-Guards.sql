@@ -1,14 +1,14 @@
 -- Alex_C.T Smart Plex modular Profilarr v2 PCD operations.
 -- 10: Size-based micro-encode guards.
--- Adds extra penalties for suspiciously tiny 1080p/4K releases.
+-- Supplemental protection against suspiciously tiny 1080p/4K releases.
 -- Import last, after the profiles exist.
 --
--- These use total release size, not true bitrate. Quality Definitions remain
--- the main MB/min guardrail layer.
+-- Quality Definitions in 08.Media-Management.sql are the primary runtime-aware
+-- limits. These total-size guards only catch unusually tiny releases.
 
-INSERT OR REPLACE INTO tags (name) VALUES ('Size Guards');
-INSERT OR REPLACE INTO tags (name) VALUES ('Micro Encode');
-INSERT OR REPLACE INTO tags (name) VALUES ('Bitrate Guard');
+INSERT OR IGNORE INTO tags (name) VALUES ('Size Guards');
+INSERT OR IGNORE INTO tags (name) VALUES ('Micro Encode');
+INSERT OR IGNORE INTO tags (name) VALUES ('Bitrate Guard');
 
 INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES (
   'Size Guard: 1080p Only Marker',
@@ -98,7 +98,7 @@ INSERT OR REPLACE INTO condition_sizes (custom_format_name, condition_name, min_
 
 -- Radarr primary 1080p/2160p movie profile.
 INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - 1080p-2160p Plex Movies', 'Size Guard: 1080p Movie Micro Encode', 'all', -50000);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - 1080p-2160p Plex Movies', 'Size Guard: 4K Movie Micro Encode', 'all', -4000);
+INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - 1080p-2160p Plex Movies', 'Size Guard: 4K Movie Micro Encode', 'all', -8000);
 INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - 1080p-2160p Plex Movies', 'Size Guard: 4K Movie Tiny Encode', 'all', -50000);
 
 -- Radarr strict 4K movie profile.

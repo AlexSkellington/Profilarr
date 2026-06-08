@@ -2,11 +2,11 @@
 -- 08: Naming settings, media settings, and quality definitions.
 -- Requires 01.Core-Tags-Languages-Qualities.sql.
 
-INSERT OR REPLACE INTO tags (name) VALUES ('Media Management');
-INSERT OR REPLACE INTO tags (name) VALUES ('Naming');
-INSERT OR REPLACE INTO tags (name) VALUES ('Quality Definitions');
-INSERT OR REPLACE INTO tags (name) VALUES ('Media Settings');
-INSERT OR REPLACE INTO tags (name) VALUES ('Plex Naming');
+INSERT OR IGNORE INTO tags (name) VALUES ('Media Management');
+INSERT OR IGNORE INTO tags (name) VALUES ('Naming');
+INSERT OR IGNORE INTO tags (name) VALUES ('Quality Definitions');
+INSERT OR IGNORE INTO tags (name) VALUES ('Media Settings');
+INSERT OR IGNORE INTO tags (name) VALUES ('Plex Naming');
 
 INSERT OR REPLACE INTO radarr_naming
 (name, rename, movie_format, movie_folder_format, replace_illegal_characters, colon_replacement_format)
@@ -43,68 +43,87 @@ INSERT OR REPLACE INTO sonarr_media_settings
 (name, propers_repacks, enable_media_info)
 VALUES ('Alex_CT Smart Plex Sonarr Media Settings', 'preferAndUpgrade', 1);
 
--- Radarr quality definitions, stored as MiB/min.
+-- Quality definitions are stored in MiB per minute.
+-- Source ladder: HDTV < WEBRip < WEBDL < Bluray < Remux.
+--
+-- Radarr 120-minute reference targets:
+--   Bluray-1080p = 7.97 / 9.96 / 11.95 GiB
+--   WEBDL-2160p  = 7.62 / 12.30 / 21.09 GiB
+--   Bluray-2160p = 9.96 / 16.41 / 25.78 GiB
+--
+-- Sonarr 45-minute reference targets:
+--   Bluray-1080p = 1.54 / 2.42 / 4.39 GiB
+--   WEBDL-2160p  = 1.76 / 3.96 / 7.91 GiB
+--   Bluray-2160p = 3.30 / 5.49 / 10.55 GiB
+
+-------------------------------------------------------------------------------
+-- Radarr quality definitions
+-------------------------------------------------------------------------------
+
 DELETE FROM radarr_quality_definitions
 WHERE name = 'Alex_CT Smart Plex Radarr Quality Definitions';
 
-INSERT OR REPLACE INTO radarr_quality_definitions
+INSERT INTO radarr_quality_definitions
 (name, quality_name, min_size, max_size, preferred_size) VALUES
-('Alex_CT Smart Plex Radarr Quality Definitions', 'Unknown', 10, 90, 45),
-('Alex_CT Smart Plex Radarr Quality Definitions', 'WORKPRINT', 0, 30, 10),
-('Alex_CT Smart Plex Radarr Quality Definitions', 'CAM', 0, 25, 8),
-('Alex_CT Smart Plex Radarr Quality Definitions', 'TELESYNC', 0, 30, 10),
-('Alex_CT Smart Plex Radarr Quality Definitions', 'TELECINE', 2, 35, 12),
+('Alex_CT Smart Plex Radarr Quality Definitions', 'Unknown', 5, 90, 40),
+('Alex_CT Smart Plex Radarr Quality Definitions', 'WORKPRINT', 0, 20, 8),
+('Alex_CT Smart Plex Radarr Quality Definitions', 'CAM', 0, 20, 8),
+('Alex_CT Smart Plex Radarr Quality Definitions', 'TELESYNC', 0, 25, 10),
+('Alex_CT Smart Plex Radarr Quality Definitions', 'TELECINE', 2, 30, 12),
 ('Alex_CT Smart Plex Radarr Quality Definitions', 'REGIONAL', 3, 40, 15),
 ('Alex_CT Smart Plex Radarr Quality Definitions', 'DVDSCR', 2, 15, 6),
-('Alex_CT Smart Plex Radarr Quality Definitions', 'SDTV', 2, 8, 4),
-('Alex_CT Smart Plex Radarr Quality Definitions', 'DVD', 2, 10, 5),
-('Alex_CT Smart Plex Radarr Quality Definitions', 'DVD-R', 4, 15, 8),
-('Alex_CT Smart Plex Radarr Quality Definitions', 'WEBDL-480p', 2, 10, 5),
-('Alex_CT Smart Plex Radarr Quality Definitions', 'WEBRip-480p', 2, 10, 5),
-('Alex_CT Smart Plex Radarr Quality Definitions', 'Bluray-480p', 3, 12, 6),
-('Alex_CT Smart Plex Radarr Quality Definitions', 'Bluray-576p', 3, 14, 7),
-('Alex_CT Smart Plex Radarr Quality Definitions', 'HDTV-720p', 7, 40, 16),
-('Alex_CT Smart Plex Radarr Quality Definitions', 'WEBDL-720p', 7, 50, 18),
-('Alex_CT Smart Plex Radarr Quality Definitions', 'WEBRip-720p', 7, 45, 17),
-('Alex_CT Smart Plex Radarr Quality Definitions', 'Bluray-720p', 9, 55, 22),
-('Alex_CT Smart Plex Radarr Quality Definitions', 'HDTV-1080p', 28, 85, 42),
-('Alex_CT Smart Plex Radarr Quality Definitions', 'WEBDL-1080p', 35, 125, 54),
-('Alex_CT Smart Plex Radarr Quality Definitions', 'WEBRip-1080p', 32, 115, 48),
+('Alex_CT Smart Plex Radarr Quality Definitions', 'SDTV', 2, 7, 4),
+('Alex_CT Smart Plex Radarr Quality Definitions', 'DVD', 4, 12, 7),
+('Alex_CT Smart Plex Radarr Quality Definitions', 'DVD-R', 5, 16, 9),
+('Alex_CT Smart Plex Radarr Quality Definitions', 'WEBRip-480p', 3, 9, 5),
+('Alex_CT Smart Plex Radarr Quality Definitions', 'WEBDL-480p', 3, 10, 6),
+('Alex_CT Smart Plex Radarr Quality Definitions', 'Bluray-480p', 5, 14, 8),
+('Alex_CT Smart Plex Radarr Quality Definitions', 'Bluray-576p', 6, 18, 10),
+('Alex_CT Smart Plex Radarr Quality Definitions', 'HDTV-720p', 10, 28, 16),
+('Alex_CT Smart Plex Radarr Quality Definitions', 'WEBRip-720p', 12, 34, 20),
+('Alex_CT Smart Plex Radarr Quality Definitions', 'WEBDL-720p', 14, 38, 22),
+('Alex_CT Smart Plex Radarr Quality Definitions', 'Bluray-720p', 18, 46, 28),
+('Alex_CT Smart Plex Radarr Quality Definitions', 'HDTV-1080p', 25, 65, 40),
+('Alex_CT Smart Plex Radarr Quality Definitions', 'WEBRip-1080p', 30, 78, 48),
+('Alex_CT Smart Plex Radarr Quality Definitions', 'WEBDL-1080p', 35, 95, 55),
 ('Alex_CT Smart Plex Radarr Quality Definitions', 'Bluray-1080p', 68, 102, 85),
-('Alex_CT Smart Plex Radarr Quality Definitions', 'Remux-1080p', 60, 180, 95),
-('Alex_CT Smart Plex Radarr Quality Definitions', 'HDTV-2160p', 32, 110, 52),
-('Alex_CT Smart Plex Radarr Quality Definitions', 'WEBDL-2160p', 36, 145, 60),
-('Alex_CT Smart Plex Radarr Quality Definitions', 'WEBRip-2160p', 34, 135, 56),
-('Alex_CT Smart Plex Radarr Quality Definitions', 'Bluray-2160p', 42, 170, 72),
-('Alex_CT Smart Plex Radarr Quality Definitions', 'Remux-2160p', 120, 450, 220),
-('Alex_CT Smart Plex Radarr Quality Definitions', 'BR-DISK', 120, 450, 220),
-('Alex_CT Smart Plex Radarr Quality Definitions', 'Raw-HD', 25, 100, 50);
+('Alex_CT Smart Plex Radarr Quality Definitions', 'Remux-1080p', 102, 320, 180),
+('Alex_CT Smart Plex Radarr Quality Definitions', 'HDTV-2160p', 50, 120, 75),
+('Alex_CT Smart Plex Radarr Quality Definitions', 'WEBRip-2160p', 55, 150, 90),
+('Alex_CT Smart Plex Radarr Quality Definitions', 'WEBDL-2160p', 65, 180, 105),
+('Alex_CT Smart Plex Radarr Quality Definitions', 'Bluray-2160p', 85, 220, 140),
+('Alex_CT Smart Plex Radarr Quality Definitions', 'Remux-2160p', 187, 650, 350),
+('Alex_CT Smart Plex Radarr Quality Definitions', 'BR-DISK', 187, 1000, 500),
+('Alex_CT Smart Plex Radarr Quality Definitions', 'Raw-HD', 100, 500, 250);
 
--- Sonarr quality definitions, stored as MiB/min.
+-------------------------------------------------------------------------------
+-- Sonarr quality definitions
+-------------------------------------------------------------------------------
+
 DELETE FROM sonarr_quality_definitions
 WHERE name = 'Alex_CT Smart Plex Sonarr Quality Definitions';
 
-INSERT OR REPLACE INTO sonarr_quality_definitions
+INSERT INTO sonarr_quality_definitions
 (name, quality_name, min_size, max_size, preferred_size) VALUES
 ('Alex_CT Smart Plex Sonarr Quality Definitions', 'Unknown', 2, 8, 4),
-('Alex_CT Smart Plex Sonarr Quality Definitions', 'SDTV', 2, 8, 4),
-('Alex_CT Smart Plex Sonarr Quality Definitions', 'WEBRip-480p', 2, 7, 3),
-('Alex_CT Smart Plex Sonarr Quality Definitions', 'WEBDL-480p', 2, 7, 4),
-('Alex_CT Smart Plex Sonarr Quality Definitions', 'DVD', 2, 8, 4),
-('Alex_CT Smart Plex Sonarr Quality Definitions', 'Bluray-480p', 3, 10, 5),
-('Alex_CT Smart Plex Sonarr Quality Definitions', 'Bluray-576p', 3, 12, 6),
-('Alex_CT Smart Plex Sonarr Quality Definitions', 'HDTV-720p', 4, 28, 10),
-('Alex_CT Smart Plex Sonarr Quality Definitions', 'HDTV-1080p', 16, 58, 24),
-('Alex_CT Smart Plex Sonarr Quality Definitions', 'Raw-HD', 25, 100, 50),
-('Alex_CT Smart Plex Sonarr Quality Definitions', 'WEBRip-720p', 5, 32, 12),
-('Alex_CT Smart Plex Sonarr Quality Definitions', 'WEBDL-720p', 5, 34, 13),
-('Alex_CT Smart Plex Sonarr Quality Definitions', 'Bluray-720p', 7, 40, 16),
-('Alex_CT Smart Plex Sonarr Quality Definitions', 'WEBRip-1080p', 19, 72, 30),
-('Alex_CT Smart Plex Sonarr Quality Definitions', 'WEBDL-1080p', 20, 80, 36),
-('Alex_CT Smart Plex Sonarr Quality Definitions', 'Bluray-1080p', 25, 95, 44),
-('Alex_CT Smart Plex Sonarr Quality Definitions', 'Remux-1080p', 60, 140, 90),
-('Alex_CT Smart Plex Sonarr Quality Definitions', 'HDTV-2160p', 31, 150, 60),
-('Alex_CT Smart Plex Sonarr Quality Definitions', 'WEBRip-2160p', 38, 210, 85),
-('Alex_CT Smart Plex Sonarr Quality Definitions', 'WEBDL-2160p', 42, 220, 92),
-('Alex_CT Smart Plex Sonarr Quality Definitions', 'Bluray-2160p', 50, 240, 105),
-('Alex_CT Smart Plex Sonarr Quality Definitions', 'Remux-2160p', 120, 450, 220);
+('Alex_CT Smart Plex Sonarr Quality Definitions', 'SDTV', 2, 7, 4),
+('Alex_CT Smart Plex Sonarr Quality Definitions', 'DVD', 4, 12, 7),
+('Alex_CT Smart Plex Sonarr Quality Definitions', 'WEBRip-480p', 3, 9, 5),
+('Alex_CT Smart Plex Sonarr Quality Definitions', 'WEBDL-480p', 3, 10, 6),
+('Alex_CT Smart Plex Sonarr Quality Definitions', 'Bluray-480p', 5, 14, 8),
+('Alex_CT Smart Plex Sonarr Quality Definitions', 'Bluray-576p', 6, 18, 10),
+('Alex_CT Smart Plex Sonarr Quality Definitions', 'HDTV-720p', 8, 28, 15),
+('Alex_CT Smart Plex Sonarr Quality Definitions', 'WEBRip-720p', 10, 32, 18),
+('Alex_CT Smart Plex Sonarr Quality Definitions', 'WEBDL-720p', 12, 36, 20),
+('Alex_CT Smart Plex Sonarr Quality Definitions', 'Bluray-720p', 15, 45, 25),
+('Alex_CT Smart Plex Sonarr Quality Definitions', 'HDTV-1080p', 15, 55, 28),
+('Alex_CT Smart Plex Sonarr Quality Definitions', 'WEBRip-1080p', 18, 65, 32),
+('Alex_CT Smart Plex Sonarr Quality Definitions', 'WEBDL-1080p', 20, 75, 38),
+('Alex_CT Smart Plex Sonarr Quality Definitions', 'Bluray-1080p', 35, 100, 55),
+('Alex_CT Smart Plex Sonarr Quality Definitions', 'Remux-1080p', 69, 250, 130),
+('Alex_CT Smart Plex Sonarr Quality Definitions', 'HDTV-2160p', 30, 120, 60),
+('Alex_CT Smart Plex Sonarr Quality Definitions', 'WEBRip-2160p', 35, 150, 75),
+('Alex_CT Smart Plex Sonarr Quality Definitions', 'WEBDL-2160p', 40, 180, 90),
+('Alex_CT Smart Plex Sonarr Quality Definitions', 'Bluray-2160p', 75, 240, 125),
+('Alex_CT Smart Plex Sonarr Quality Definitions', 'Remux-2160p', 187, 650, 350),
+('Alex_CT Smart Plex Sonarr Quality Definitions', 'Raw-HD', 50, 250, 100);
