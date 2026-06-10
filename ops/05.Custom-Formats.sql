@@ -10,6 +10,11 @@ INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VAL
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Language: English Marker', 'Language');
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Language: English Marker', 'Language: English Marker', 'release_title', 'all', 0, 1);
 INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('Language: English Marker', 'Language: English Marker', 'Language: English Marker');
+INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('Language: Spanish Audio Marker', 'Standalone Spanish-audio signal for movie scoring. Matches Spanish, Castellano, Latino, LATAM, and related tags without requiring English or multi-audio to be present.', 0);
+INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Language: Spanish Audio Marker', 'Language');
+INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Language: Spanish Audio Marker', 'Scoring');
+INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Language: Spanish Audio Marker', 'Language: Spanish Audio Marker', 'release_title', 'all', 0, 1);
+INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('Language: Spanish Audio Marker', 'Language: Spanish Audio Marker', 'Language: Spanish Audio Marker');
 INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('Language: Spanish-Only Fallback', 'Preferred single-language fallback. Rewards explicit Spanish or Castellano tags when a true bilingual English+Spanish release is not available.', 0);
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Language: Spanish-Only Fallback', 'Language');
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Language: Spanish-Only Fallback', 'Scoring');
@@ -54,7 +59,7 @@ INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES 
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Subtitles: Block Hardcoded-Burned-In', 'Blocking');
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Subtitles: Block Hardcoded-Burned-In', 'Subtitles: Block Hardcoded-Burned-In', 'release_title', 'all', 0, 1);
 INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('Subtitles: Block Hardcoded-Burned-In', 'Subtitles: Block Hardcoded-Burned-In', 'Subtitles: Block Hardcoded-Burned-In');
-INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('Codec: AV1 Preferred', 'Top efficient-codec preference. AV1 is scored slightly above x265/HEVC so it wins ties when quality, source, HDR, audio, and language scoring are otherwise comparable.', 0);
+INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('Codec: AV1 Preferred', 'High-efficiency alternate codec signal. AV1 stays available for compact releases, but movie profiles can score it slightly below x265/HEVC when compatibility and consistency matter more than theoretical efficiency.', 0);
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Codec: AV1 Preferred', 'Codec');
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Codec: AV1 Preferred', 'Scoring');
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Codec: AV1 Preferred', 'Codec: AV1 Preferred', 'release_title', 'all', 0, 1);
@@ -99,6 +104,11 @@ INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES 
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('HDR: HDR10+ Bonus', 'Scoring');
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('HDR: HDR10+ Bonus', 'HDR: HDR10+ Bonus', 'release_title', 'all', 0, 1);
 INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('HDR: HDR10+ Bonus', 'HDR: HDR10+ Bonus', 'HDR: HDR10+ Bonus');
+INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('HDR: Dolby Vision Bonus', 'Standalone Dolby Vision signal for movie scoring. Lets profiles reward Dolby Vision directly without bundling it together with HDR or surround requirements.', 0);
+INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('HDR: Dolby Vision Bonus', 'HDR / 4K');
+INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('HDR: Dolby Vision Bonus', 'Scoring');
+INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('HDR: Dolby Vision Bonus', 'HDR: Dolby Vision Bonus', 'release_title', 'all', 0, 1);
+INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('HDR: Dolby Vision Bonus', 'HDR: Dolby Vision Bonus', 'HDR: Dolby Vision Bonus');
 INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('HDR: Dolby Vision + HDR Bonus', 'Rewards Dolby Vision only when HDR, HDR10, or HDR10+ is also present. This builds the preferred Dolby Vision plus HDR ladders without overvaluing DV-only releases.', 0);
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('HDR: Dolby Vision + HDR Bonus', 'HDR / 4K');
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('HDR: Dolby Vision + HDR Bonus', 'Scoring');
@@ -118,6 +128,11 @@ INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES 
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('HDR: Dolby Vision Only Fallback', 'Scoring');
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('HDR: Dolby Vision Only Fallback', 'HDR: Dolby Vision Only Fallback', 'release_title', 'all', 0, 1);
 INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('HDR: Dolby Vision Only Fallback', 'HDR: Dolby Vision Only Fallback', 'HDR: Dolby Vision Only Fallback');
+INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('Audio: Surround Bonus', 'Standalone surround-audio signal for movie scoring. Matches explicit 5.1+ channel layouts plus Atmos, DTS-HD, and TrueHD style markers without bundling the score together with HDR or codec rules.', 0);
+INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Audio: Surround Bonus', 'Audio');
+INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Audio: Surround Bonus', 'Scoring');
+INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Audio: Surround Bonus', 'Audio: Surround Bonus', 'release_title', 'all', 0, 1);
+INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('Audio: Surround Bonus', 'Audio: Surround Bonus', 'Audio: Surround Bonus');
 INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('Audio: 5.1 Surround Preferred', 'Primary surround-audio bonus for 5.1, 6-channel, and 5.1ch tags. This is the main compatibility target for a Plex setup built around a 5.1-capable soundbar.', 0);
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Audio: 5.1 Surround Preferred', 'Audio');
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Audio: 5.1 Surround Preferred', 'Scoring');

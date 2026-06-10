@@ -2,7 +2,7 @@
 -- 03: Codec, HDR, and audio regular expressions.
 -- Requires 01.Core-Tags-Languages-Qualities.sql.
 
-INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Codec: AV1 Preferred', '(?i)\bav1\b', 'Top efficient-codec preference. AV1 is scored slightly above x265/HEVC so it wins ties when quality, source, HDR, audio, and language scoring are otherwise comparable.');
+INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Codec: AV1 Preferred', '(?i)\bav1\b', 'High-efficiency alternate codec signal. AV1 stays available for compact releases, but movie profiles can score it slightly below x265/HEVC when compatibility and consistency matter more than theoretical efficiency.');
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Codec: AV1 Preferred', 'Codec');
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Codec: AV1 Preferred', 'Scoring');
 INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Codec: VVC-x266 Future', '(?i)\b(?:vvc|h[ ._-]?266|x[ ._-]?266)\b', 'Third-place codec preference. H.266, x266, and VVC are recognized, but they stay below x265 and AV1 in every managed profile.');
@@ -27,6 +27,9 @@ INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_nam
 INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('HDR: HDR10+ Bonus', '(?i)(?:\bhdr10plus\b|\bhdr10\+)', 'Top non-Dolby-Vision HDR bonus for HDR10+ and HDR10 Plus tags. Combined with Dolby Vision, this becomes the strongest HDR path.');
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('HDR: HDR10+ Bonus', 'HDR / 4K');
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('HDR: HDR10+ Bonus', 'Scoring');
+INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('HDR: Dolby Vision Bonus', '(?i)\b(?:dolby[ ._-]?vision|dovi|dv)\b', 'Standalone Dolby Vision signal for movie scoring. Lets profiles reward Dolby Vision directly without bundling it together with HDR or surround requirements.');
+INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('HDR: Dolby Vision Bonus', 'HDR / 4K');
+INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('HDR: Dolby Vision Bonus', 'Scoring');
 INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('HDR: Dolby Vision + HDR Bonus', '(?i)^(?=.*\b(?:dovi|dolby[ ._-]?vision|dv)\b)(?=.*(?:\bhdr\b|\bhdr10\b|\bhdr10plus\b|\bhdr10\+)).*$', 'Rewards Dolby Vision only when HDR, HDR10, or HDR10+ is also present. This builds the preferred Dolby Vision plus HDR ladders without overvaluing DV-only releases.');
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('HDR: Dolby Vision + HDR Bonus', 'HDR / 4K');
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('HDR: Dolby Vision + HDR Bonus', 'Scoring');
@@ -35,6 +38,9 @@ INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_nam
 INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('HDR: Dolby Vision Only Fallback', '(?i)^(?=.*\b(?:dovi|dolby[ ._-]?vision|dv)\b)(?!.*(?:\bhdr\b|\bhdr10\b|\bhdr10plus\b|\bhdr10\+)).*$', 'Small Dolby Vision-only fallback score. DV-only releases stay above SDR when necessary, but below every Dolby Vision plus HDR combination.');
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('HDR: Dolby Vision Only Fallback', 'HDR / 4K');
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('HDR: Dolby Vision Only Fallback', 'Scoring');
+INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Audio: Surround Bonus', '(?i)\b(?:5[ ._-]?1|6[ ._-]?1|7[ ._-]?1|6ch|7ch|8ch|5\.1ch|6\.1ch|7\.1ch|dolby[ ._-]?atmos|ddp[ ._-]?atmos|ec3[ ._-]?joc|atmos|dts(?:[ ._-]?hd)?(?:[ ._-]?ma)?|truehd|true[ ._-]?hd)\b', 'Standalone surround-audio signal for movie scoring. Matches explicit 5.1+ channel layouts plus Atmos, DTS-HD, and TrueHD style markers without bundling the score together with HDR or codec rules.');
+INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Audio: Surround Bonus', 'Audio');
+INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Audio: Surround Bonus', 'Scoring');
 INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Audio: 5.1 Surround Preferred', '(?i)\b(?:5[ ._-]?1|6ch|5\.1ch)\b', 'Primary surround-audio bonus for 5.1, 6-channel, and 5.1ch tags. This is the main compatibility target for a Plex setup built around a 5.1-capable soundbar.');
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Audio: 5.1 Surround Preferred', 'Audio');
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Audio: 5.1 Surround Preferred', 'Scoring');
