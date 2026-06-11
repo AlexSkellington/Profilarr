@@ -32,7 +32,7 @@ OLD_FILES = [
 ]
 
 EXPECTED_PROFILES = [
-    "Alex_C.T - 1080p-2160p Plex Movies",
+    "Alex_C.T - 1080p Plex Movies",
     "Alex_C.T - 4K Plex Movies",
     "Alex_C.T - Catalog 480p-1080p Plex Movies",
     "Alex_C.T - 1080p-2160p Plex Series",
@@ -108,7 +108,7 @@ for marker in required_markers:
         fail(f"Missing expected marker: {marker}")
 
 checks = {
-    "1080p movie cutoff is Bluray-1080p": r"Alex_C\.T - 1080p-2160p Plex Movies'.*?'Bluray-1080p'.*?upgrade_until\) VALUES .*?, 1\)",
+    "1080p movie cutoff is Bluray-1080p": r"Alex_C\.T - 1080p Plex Movies'.*?'Bluray-1080p'.*?upgrade_until\) VALUES .*?, 1\)",
     "4K movie cutoff is Bluray-2160p": r"Alex_C\.T - 4K Plex Movies'.*?'Bluray-2160p'.*?upgrade_until\) VALUES .*?, 1\)",
     "1080p series cutoff is Bluray-1080p": r"Alex_C\.T - 1080p-2160p Plex Series'.*?'Bluray-1080p'.*?upgrade_until\) VALUES .*?, 1\)",
     "4K series cutoff is Bluray-2160p": r"Alex_C\.T - 4K Plex Series'.*?'Bluray-2160p'.*?upgrade_until\) VALUES .*?, 1\)",
