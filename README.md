@@ -75,6 +75,8 @@ Movie and series profiles are fully additive. Releases only gain points for feat
 
 Compound combo formats such as "resolution + codec" or "HDR + surround" are no longer part of the default scoring path. Source, codec, Main 10, HDR tiers, audio tiers, release fixes, and editions are all rewarded individually so the ladders stay easier to reason about and maintain.
 
+Movie profile weights are intentionally stretched so stacked feature-rich releases can land much closer to the 900 to 1000 range on individual bonuses alone, without bringing back compound combo formats.
+
 MediaInfo is enabled for import-time metadata and for the rename templates, but the current PCD schema only exposes custom-format condition types such as `release_title`, `size`, `source`, `resolution`, and similar parsed fields. Codec, HDR, audio, and edition custom formats therefore still depend on release naming rather than true MediaInfo-backed custom-format matching at this layer today.
 
 The default profiles no longer attach remux/raw-disk blockers, x264 penalties, HDR/4K hard gates, size penalties, or compound combo bonuses. Encoded BluRay and strong WEB-DL releases win through quality order plus positive source, codec, HDR, audio, language, subtitle, and edition bonuses, which keeps space use lower than a remux-first strategy.
