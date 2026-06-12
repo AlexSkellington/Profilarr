@@ -2,7 +2,7 @@
 
 A personal modular Profilarr-compliant database for Radarr and Sonarr, built for Alejandro's Smart Plex managed library setup.
 
-This database contains categorized custom formats, additive movie scoring, stricter series scoring, media-management settings, quality definitions, a delay profile, and series-only size guards.
+This database contains categorized custom formats, additive scoring for movies and series, media-management settings, quality definitions, a delay profile, and optional series-only size helpers.
 
 ## Import order
 
@@ -35,10 +35,10 @@ GitHub paths are case-sensitive. Keep these filenames exactly as written.
 - `06.Custom-Formats-Codec-HDR-Audio-Resolution.sql`: codec, HDR, audio, and resolution/source custom formats.
 - `07.Custom-Formats-Source-Editions-Releases.sql`: source, edition, and release-fix custom formats.
 - `08.Radarr-Movie-Profiles.sql`: Radarr movie profiles with fully additive scoring.
-- `09.Sonarr-Series-Profiles.sql`: Sonarr series profiles with stricter scoring and guards.
+- `09.Sonarr-Series-Profiles.sql`: Sonarr series profiles with fully additive scoring.
 - `10.Media-Management.sql`: Radarr/Sonarr naming, media settings, and quality definitions.
 - `11.Delay-Profiles.sql`: Usenet-first delay profile.
-- `12.Series-Size-Guards.sql`: series-only size-based guards for suspiciously tiny TV releases.
+- `12.Series-Size-Guards.sql`: optional series-only size helper formats for suspiciously tiny TV releases.
 
 ## Migration from the old layouts
 
@@ -71,10 +71,10 @@ Since this is a full modular restructure:
 
 ## Notes
 
-Movie profiles are fully additive. Movies only gain points for features they actually have.
+Movie and series profiles are fully additive. Releases only gain points for features they actually have.
 
-Movie profiles no longer attach remux/raw-disk blockers or movie size guards. Encoded BluRay and strong WEB-DL releases win through quality order plus positive source, codec, HDR, audio, language, subtitle, and edition bonuses, which keeps space use lower than a remux-first strategy.
+The default profiles no longer attach remux/raw-disk blockers, x264 penalties, HDR/4K hard gates, or size penalties. Encoded BluRay and strong WEB-DL releases win through quality order plus positive source, codec, HDR, audio, language, subtitle, and edition bonuses, which keeps space use lower than a remux-first strategy.
 
-Strict blocking custom formats still exist in the categorized custom-format files for optional use in harsher profiles.
+Strict blocking custom formats still exist in the categorized custom-format files for optional use if you want harsher profiles again later.
 
-The series size guards use total release size, not true bitrate. Quality Definitions remain the main MB/min guardrail layer.
+The series size helpers use total release size, not true bitrate. Quality Definitions remain the main MB/min guardrail layer, and the helper formats are left unattached by default.
