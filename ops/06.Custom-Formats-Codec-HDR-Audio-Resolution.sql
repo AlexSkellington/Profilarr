@@ -139,17 +139,6 @@ INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES 
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('1080p: UHD BluRay Source Bonus', '1080p: UHD BluRay Source Bonus', 'release_title', 'all', 0, 1);
 INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('1080p: UHD BluRay Source Bonus', '1080p: UHD BluRay Source Bonus', '1080p: UHD BluRay Source Bonus');
 
-INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('1080p: HDR + Surround Preferred', '1080p-only preference for efficient-codec releases that advertise HDR or Dolby Vision and 5.1+ surround. This gives strong 1080p titles their own clean lane instead of borrowing 4K custom formats.', 0);
-INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('1080p: HDR + Surround Preferred', 'HDR / 4K');
-INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('1080p: HDR + Surround Preferred', 'Scoring');
-INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('1080p: HDR + Surround Preferred', '1080p: HDR + Surround Preferred', 'release_title', 'all', 0, 1);
-INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('1080p: HDR + Surround Preferred', '1080p: HDR + Surround Preferred', '1080p: HDR + Surround Preferred');
-
-INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('1080p: Efficient Encode Bonus', '1080p-only bonus for efficient codecs such as HEVC/x265, AV1, or VVC/x266. It never matches true 2160p or 4K titles.', 0);
-INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('1080p: Efficient Encode Bonus', 'Scoring');
-INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('1080p: Efficient Encode Bonus', '1080p: Efficient Encode Bonus', 'release_title', 'all', 0, 1);
-INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('1080p: Efficient Encode Bonus', '1080p: Efficient Encode Bonus', '1080p: Efficient Encode Bonus');
-
 INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('1080p: BluRay Preferred', '1080p-only source bonus for BluRay releases. This keeps 1080p BluRay preference separate from the true 4K UHD BluRay preference.', 0);
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('1080p: BluRay Preferred', 'Scoring');
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('1080p: BluRay Preferred', '1080p: BluRay Preferred', 'release_title', 'all', 0, 1);
@@ -169,17 +158,6 @@ INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VAL
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('1080p: BDRip Source', 'Smart Plex');
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('1080p: BDRip Source', '1080p: BDRip Source', 'release_title', 'all', 0, 1);
 INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('1080p: BDRip Source', '1080p: BDRip Source', '1080p: BDRip Source');
-
-INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('720p: HDR + Surround Preferred', '720p-only preference for efficient-codec releases that also advertise HDR/Dolby Vision and surround audio. Used mainly by relaxed catalog-style profiles.', 0);
-INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('720p: HDR + Surround Preferred', 'HDR / 4K');
-INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('720p: HDR + Surround Preferred', 'Scoring');
-INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('720p: HDR + Surround Preferred', '720p: HDR + Surround Preferred', 'release_title', 'all', 0, 1);
-INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('720p: HDR + Surround Preferred', '720p: HDR + Surround Preferred', '720p: HDR + Surround Preferred');
-
-INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('720p: Efficient Encode Bonus', '720p-only bonus for efficient codecs such as HEVC/x265, AV1, or VVC/x266. It never matches 1080p or true 4K titles.', 0);
-INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('720p: Efficient Encode Bonus', 'Scoring');
-INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('720p: Efficient Encode Bonus', '720p: Efficient Encode Bonus', 'release_title', 'all', 0, 1);
-INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('720p: Efficient Encode Bonus', '720p: Efficient Encode Bonus', '720p: Efficient Encode Bonus');
 
 INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('720p: BluRay Preferred', '720p-only BluRay source bonus. Keeps 720p BluRay ranking separate from 1080p and 4K BluRay rules.', 0);
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('720p: BluRay Preferred', 'Scoring');
@@ -201,17 +179,6 @@ INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES 
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('720p: BDRip Source', '720p: BDRip Source', 'release_title', 'all', 0, 1);
 INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('720p: BDRip Source', '720p: BDRip Source', '720p: BDRip Source');
 
-INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('576p: HDR + Surround Preferred', '576p-only preference for rare lower-resolution HDR/surround releases. It stays isolated from 480p, 720p, 1080p, and 4K formats.', 0);
-INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('576p: HDR + Surround Preferred', 'HDR / 4K');
-INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('576p: HDR + Surround Preferred', 'Scoring');
-INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('576p: HDR + Surround Preferred', '576p: HDR + Surround Preferred', 'release_title', 'all', 0, 1);
-INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('576p: HDR + Surround Preferred', '576p: HDR + Surround Preferred', '576p: HDR + Surround Preferred');
-
-INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('576p: Efficient Encode Bonus', '576p-only efficient-codec bonus for archive/catalog releases.', 0);
-INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('576p: Efficient Encode Bonus', 'Scoring');
-INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('576p: Efficient Encode Bonus', '576p: Efficient Encode Bonus', 'release_title', 'all', 0, 1);
-INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('576p: Efficient Encode Bonus', '576p: Efficient Encode Bonus', '576p: Efficient Encode Bonus');
-
 INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('576p: BluRay Preferred', '576p-only BluRay source bonus for PAL/576p-style archive releases.', 0);
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('576p: BluRay Preferred', 'Scoring');
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('576p: BluRay Preferred', '576p: BluRay Preferred', 'release_title', 'all', 0, 1);
@@ -231,17 +198,6 @@ INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VAL
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('576p: BDRip Source', 'Smart Plex');
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('576p: BDRip Source', '576p: BDRip Source', 'release_title', 'all', 0, 1);
 INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('576p: BDRip Source', '576p: BDRip Source', '576p: BDRip Source');
-
-INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('480p: HDR + Surround Preferred', '480p-only preference for rare low-resolution HDR/surround releases. Mostly useful for catalog scoring and remains isolated from higher resolutions.', 0);
-INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('480p: HDR + Surround Preferred', 'HDR / 4K');
-INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('480p: HDR + Surround Preferred', 'Scoring');
-INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('480p: HDR + Surround Preferred', '480p: HDR + Surround Preferred', 'release_title', 'all', 0, 1);
-INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('480p: HDR + Surround Preferred', '480p: HDR + Surround Preferred', '480p: HDR + Surround Preferred');
-
-INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('480p: Efficient Encode Bonus', '480p-only efficient-codec bonus for archive/catalog releases.', 0);
-INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('480p: Efficient Encode Bonus', 'Scoring');
-INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('480p: Efficient Encode Bonus', '480p: Efficient Encode Bonus', 'release_title', 'all', 0, 1);
-INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('480p: Efficient Encode Bonus', '480p: Efficient Encode Bonus', '480p: Efficient Encode Bonus');
 
 INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('480p: BluRay Preferred', '480p-only BluRay source bonus for older catalog or archive releases.', 0);
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('480p: BluRay Preferred', 'Scoring');
@@ -268,19 +224,6 @@ INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES 
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('4K: Block x264-H264', 'Blocking');
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('4K: Block x264-H264', '4K: Block x264-H264', 'release_title', 'all', 0, 1);
 INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('4K: Block x264-H264', '4K: Block x264-H264', '4K: Block x264-H264');
-
-INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('4K: HDR + Surround Preferred', 'Positive compact-4K rule used by the 1080p-2160p profiles: rewards 4K releases only when they are efficient-codec, HDR/Dolby Vision, and have surround audio markers.', 0);
-INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('4K: HDR + Surround Preferred', 'HDR / 4K');
-INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('4K: HDR + Surround Preferred', 'Scoring');
-INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('4K: HDR + Surround Preferred', '4K: HDR + Surround Preferred', 'release_title', 'all', 0, 1);
-INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('4K: HDR + Surround Preferred', '4K: HDR + Surround Preferred', '4K: HDR + Surround Preferred');
-
-INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('4K: Efficient Encode Bonus', 'Rewards 4K releases that also use an efficient codec such as HEVC, x265, AV1, H.266, x266, or VVC.', 0);
-INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('4K: Efficient Encode Bonus', 'HDR / 4K');
-INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('4K: Efficient Encode Bonus', 'Scoring');
-INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('4K: Efficient Encode Bonus', '4K: Efficient Encode Bonus', 'release_title', 'all', 0, 1);
-INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('4K: Efficient Encode Bonus', '4K: Efficient Encode Bonus', '4K: Efficient Encode Bonus');
-
 INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('4K: UHD BluRay Preferred', 'Rewards 4K UHD BluRay or 4K BluRay source tags. Used to prefer cleaner 4K disc-sourced encodes when the file still fits the space-balanced rules.', 0);
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('4K: UHD BluRay Preferred', 'HDR / 4K');
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('4K: UHD BluRay Preferred', 'Scoring');

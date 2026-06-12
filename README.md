@@ -2,7 +2,7 @@
 
 A personal modular Profilarr-compliant database for Radarr and Sonarr, built for Alejandro's Smart Plex managed library setup.
 
-This database contains categorized custom formats, additive scoring for movies and series, media-management settings, quality definitions, a delay profile, and optional series-only size helpers.
+This database contains categorized custom formats, fully additive individual-bonus scoring for movies and series, media-management settings, quality definitions, a delay profile, and optional series-only size helpers.
 
 ## Import order
 
@@ -73,7 +73,11 @@ Since this is a full modular restructure:
 
 Movie and series profiles are fully additive. Releases only gain points for features they actually have.
 
-The default profiles no longer attach remux/raw-disk blockers, x264 penalties, HDR/4K hard gates, or size penalties. Encoded BluRay and strong WEB-DL releases win through quality order plus positive source, codec, HDR, audio, language, subtitle, and edition bonuses, which keeps space use lower than a remux-first strategy.
+Compound combo formats such as "resolution + codec" or "HDR + surround" are no longer part of the default scoring path. Source, codec, Main 10, HDR tiers, audio tiers, release fixes, and editions are all rewarded individually so the ladders stay easier to reason about and maintain.
+
+MediaInfo is enabled for import-time metadata and for the rename templates, but the current PCD schema only exposes custom-format condition types such as `release_title`, `size`, `source`, `resolution`, and similar parsed fields. Codec, HDR, audio, and edition custom formats therefore still depend on release naming rather than true MediaInfo-backed custom-format matching at this layer today.
+
+The default profiles no longer attach remux/raw-disk blockers, x264 penalties, HDR/4K hard gates, size penalties, or compound combo bonuses. Encoded BluRay and strong WEB-DL releases win through quality order plus positive source, codec, HDR, audio, language, subtitle, and edition bonuses, which keeps space use lower than a remux-first strategy.
 
 Strict blocking custom formats still exist in the categorized custom-format files for optional use if you want harsher profiles again later.
 
