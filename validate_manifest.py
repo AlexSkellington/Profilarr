@@ -15,12 +15,14 @@ REQUIRED_FILES = [
     "ops/02.Regular-Expressions-Language-Subtitles.sql",
     "ops/03.Regular-Expressions-Codecs-HDR-Audio.sql",
     "ops/04.Regular-Expressions-Resolution-Source-Editions.sql",
-    "ops/05.Custom-Formats.sql",
-    "ops/06.Radarr-Movie-Profiles.sql",
-    "ops/07.Sonarr-Series-Profiles.sql",
-    "ops/08.Media-Management.sql",
-    "ops/09.Delay-Profiles.sql",
-    "ops/10.Micro-Encode-Guards.sql",
+    "ops/05.Custom-Formats-Language-Subtitles.sql",
+    "ops/06.Custom-Formats-Codec-HDR-Audio-Resolution.sql",
+    "ops/07.Custom-Formats-Source-Editions-Releases.sql",
+    "ops/08.Radarr-Movie-Profiles.sql",
+    "ops/09.Sonarr-Series-Profiles.sql",
+    "ops/10.Media-Management.sql",
+    "ops/11.Delay-Profiles.sql",
+    "ops/12.Series-Size-Guards.sql",
 ]
 
 OLD_FILES = [
@@ -29,6 +31,12 @@ OLD_FILES = [
     "ops/2.Smart-Plex-Media-Management.sql",
     "ops/3.Smart-Plex-Delay-Profile.sql",
     "ops/4.Smart-Plex-Micro-Encode-Guards.sql",
+    "ops/05.Custom-Formats.sql",
+    "ops/06.Radarr-Movie-Profiles.sql",
+    "ops/07.Sonarr-Series-Profiles.sql",
+    "ops/08.Media-Management.sql",
+    "ops/09.Delay-Profiles.sql",
+    "ops/10.Micro-Encode-Guards.sql",
 ]
 
 EXPECTED_PROFILES = [
@@ -40,10 +48,7 @@ EXPECTED_PROFILES = [
     "Alex_C.T - Catalog 480p-1080p Plex Series",
 ]
 
-EXPECTED_MICRO_GUARDS = [
-    "Size Guard: 1080p Movie Micro Encode",
-    "Size Guard: 4K Movie Micro Encode",
-    "Size Guard: 4K Movie Tiny Encode",
+EXPECTED_SERIES_SIZE_GUARDS = [
     "Size Guard: 1080p Episode Tiny Encode",
     "Size Guard: 4K Episode Tiny Encode",
 ]
@@ -89,9 +94,9 @@ for profile in EXPECTED_PROFILES:
     if profile not in combined:
         fail(f"Missing expected profile: {profile}")
 
-for guard in EXPECTED_MICRO_GUARDS:
+for guard in EXPECTED_SERIES_SIZE_GUARDS:
     if guard not in combined:
-        fail(f"Missing expected micro-encode guard: {guard}")
+        fail(f"Missing expected series size guard: {guard}")
 
 required_markers = [
     "Language: Prefer English + Spanish",
@@ -117,8 +122,8 @@ for label, pattern in checks.items():
     if not re.search(pattern, combined, flags=re.S):
         fail(f"Could not verify: {label}")
 
-if "condition_sizes" not in read("ops/10.Micro-Encode-Guards.sql"):
-    fail("Micro-encode guard file should use condition_sizes")
+if "condition_sizes" not in read("ops/12.Series-Size-Guards.sql"):
+    fail("Series size guard file should use condition_sizes")
 
 if errors:
     print("Validation failed:")

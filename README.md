@@ -2,7 +2,7 @@
 
 A personal modular Profilarr-compliant database for Radarr and Sonarr, built for Alejandro's Smart Plex managed library setup.
 
-This database contains curated quality profiles, custom formats, regular expressions, tags, scoring logic, media-management settings, quality definitions, a delay profile, and size-based micro-encode guards.
+This database contains categorized custom formats, additive movie scoring, stricter series scoring, media-management settings, quality definitions, a delay profile, and series-only size guards.
 
 ## Import order
 
@@ -13,12 +13,14 @@ ops/01.Core-Tags-Languages-Qualities.sql
 ops/02.Regular-Expressions-Language-Subtitles.sql
 ops/03.Regular-Expressions-Codecs-HDR-Audio.sql
 ops/04.Regular-Expressions-Resolution-Source-Editions.sql
-ops/05.Custom-Formats.sql
-ops/06.Radarr-Movie-Profiles.sql
-ops/07.Sonarr-Series-Profiles.sql
-ops/08.Media-Management.sql
-ops/09.Delay-Profiles.sql
-ops/10.Micro-Encode-Guards.sql
+ops/05.Custom-Formats-Language-Subtitles.sql
+ops/06.Custom-Formats-Codec-HDR-Audio-Resolution.sql
+ops/07.Custom-Formats-Source-Editions-Releases.sql
+ops/08.Radarr-Movie-Profiles.sql
+ops/09.Sonarr-Series-Profiles.sql
+ops/10.Media-Management.sql
+ops/11.Delay-Profiles.sql
+ops/12.Series-Size-Guards.sql
 ```
 
 GitHub paths are case-sensitive. Keep these filenames exactly as written.
@@ -29,14 +31,16 @@ GitHub paths are case-sensitive. Keep these filenames exactly as written.
 - `02.Regular-Expressions-Language-Subtitles.sql`: EN/ES/Latino language logic and subtitle rules.
 - `03.Regular-Expressions-Codecs-HDR-Audio.sql`: HEVC/AV1/VVC/x264, HDR/DV, and audio rules.
 - `04.Regular-Expressions-Resolution-Source-Editions.sql`: resolution-specific source rules, 4K gates, editions, and release fixes.
-- `05.Custom-Formats.sql`: custom format records, tags, conditions, and regex bindings.
-- `06.Radarr-Movie-Profiles.sql`: Radarr movie profiles and scoring.
-- `07.Sonarr-Series-Profiles.sql`: Sonarr series profiles and scoring.
-- `08.Media-Management.sql`: Radarr/Sonarr naming, media settings, and quality definitions.
-- `09.Delay-Profiles.sql`: Usenet-first delay profile.
-- `10.Micro-Encode-Guards.sql`: size-based penalties for suspiciously tiny releases.
+- `05.Custom-Formats-Language-Subtitles.sql`: language and subtitle custom formats, tags, conditions, and regex bindings.
+- `06.Custom-Formats-Codec-HDR-Audio-Resolution.sql`: codec, HDR, audio, and resolution/source custom formats.
+- `07.Custom-Formats-Source-Editions-Releases.sql`: source, edition, and release-fix custom formats.
+- `08.Radarr-Movie-Profiles.sql`: Radarr movie profiles with fully additive scoring.
+- `09.Sonarr-Series-Profiles.sql`: Sonarr series profiles with stricter scoring and guards.
+- `10.Media-Management.sql`: Radarr/Sonarr naming, media settings, and quality definitions.
+- `11.Delay-Profiles.sql`: Usenet-first delay profile.
+- `12.Series-Size-Guards.sql`: series-only size-based guards for suspiciously tiny TV releases.
 
-## Migration from the old layout
+## Migration from the old layouts
 
 Delete or move these old files from `ops/` so the repo stays clean:
 
@@ -45,6 +49,12 @@ ops/1.Smart-Managed-Library.sql
 ops/2.Smart-Plex-Media-Management.sql
 ops/3.Smart-Plex-Delay-Profile.sql
 ops/4.Smart-Plex-Micro-Encode-Guards.sql
+ops/05.Custom-Formats.sql
+ops/06.Radarr-Movie-Profiles.sql
+ops/07.Sonarr-Series-Profiles.sql
+ops/08.Media-Management.sql
+ops/09.Delay-Profiles.sql
+ops/10.Micro-Encode-Guards.sql
 ```
 
 Then add the new numbered files.
@@ -61,4 +71,10 @@ Since this is a full modular restructure:
 
 ## Notes
 
-The micro-encode guards use total release size, not true bitrate. Quality Definitions remain the main MB/min guardrail layer.
+Movie profiles are fully additive. Movies only gain points for features they actually have.
+
+Movie profiles no longer attach remux/raw-disk blockers or movie size guards. Encoded BluRay and strong WEB-DL releases win through quality order plus positive source, codec, HDR, audio, language, subtitle, and edition bonuses, which keeps space use lower than a remux-first strategy.
+
+Strict blocking custom formats still exist in the categorized custom-format files for optional use in harsher profiles.
+
+The series size guards use total release size, not true bitrate. Quality Definitions remain the main MB/min guardrail layer.

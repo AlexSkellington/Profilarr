@@ -1,5 +1,5 @@
 -- Alex_C.T Smart Plex modular Profilarr v2 PCD operations.
--- 08: Naming settings, media settings, and quality definitions.
+-- 10: Naming settings, media settings, and quality definitions.
 -- Requires 01.Core-Tags-Languages-Qualities.sql.
 
 INSERT OR IGNORE INTO tags (name) VALUES ('Media Management');
@@ -47,9 +47,9 @@ VALUES ('Alex_CT Smart Plex Sonarr Media Settings', 'preferAndUpgrade', 1);
 -- Source ladder: HDTV < WEBRip < WEBDL < Bluray < Remux.
 --
 -- Radarr 120-minute reference targets:
---   Bluray-1080p = 7.97 / 9.96 / 11.95 GiB
+--   Bluray-1080p = 6.80 / 9.61 / 11.95 GiB
 --   WEBDL-2160p  = 7.62 / 12.30 / 21.09 GiB
---   Bluray-2160p = 9.96 / 16.41 / 25.78 GiB
+--   Bluray-2160p = 8.79 / 15.23 / 25.78 GiB
 --
 -- Sonarr 45-minute reference targets:
 --   Bluray-1080p = 1.54 / 2.42 / 4.39 GiB
@@ -86,12 +86,12 @@ INSERT INTO radarr_quality_definitions
 ('Alex_CT Smart Plex Radarr Quality Definitions', 'HDTV-1080p', 25, 65, 40),
 ('Alex_CT Smart Plex Radarr Quality Definitions', 'WEBRip-1080p', 30, 78, 48),
 ('Alex_CT Smart Plex Radarr Quality Definitions', 'WEBDL-1080p', 35, 95, 55),
-('Alex_CT Smart Plex Radarr Quality Definitions', 'Bluray-1080p', 68, 102, 85),
+('Alex_CT Smart Plex Radarr Quality Definitions', 'Bluray-1080p', 58, 102, 82),
 ('Alex_CT Smart Plex Radarr Quality Definitions', 'Remux-1080p', 102, 320, 180),
 ('Alex_CT Smart Plex Radarr Quality Definitions', 'HDTV-2160p', 50, 120, 75),
 ('Alex_CT Smart Plex Radarr Quality Definitions', 'WEBRip-2160p', 55, 150, 90),
 ('Alex_CT Smart Plex Radarr Quality Definitions', 'WEBDL-2160p', 65, 180, 105),
-('Alex_CT Smart Plex Radarr Quality Definitions', 'Bluray-2160p', 85, 220, 140),
+('Alex_CT Smart Plex Radarr Quality Definitions', 'Bluray-2160p', 75, 220, 130),
 ('Alex_CT Smart Plex Radarr Quality Definitions', 'Remux-2160p', 187, 650, 350),
 ('Alex_CT Smart Plex Radarr Quality Definitions', 'BR-DISK', 187, 1000, 500),
 ('Alex_CT Smart Plex Radarr Quality Definitions', 'Raw-HD', 100, 500, 250);

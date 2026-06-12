@@ -1,6 +1,6 @@
 -- Alex_C.T Smart Plex modular Profilarr v2 PCD operations.
--- 07: Sonarr series quality profiles and custom-format scoring.
--- Requires 01 through 05.
+-- 09: Sonarr series quality profiles and custom-format scoring.
+-- Requires 01 through 07.
 
 INSERT OR REPLACE INTO quality_profiles (name, description, upgrades_allowed, minimum_custom_format_score, upgrade_until_score, upgrade_score_increment) VALUES ('Alex_C.T - 1080p-2160p Plex Series', 'Primary Sonarr profile for modern series. It prefers feature-rich 1080p first, then compact 2160p HDR/5.1 as a fallback, then weaker 1080p releases. HDR/Dolby Vision is preferred but more relaxed than movies because HDR TV is less common. Spanish-friendly and multilingual releases remain strongly favored. Target rip quality: 8.5/10.', 1, 0, 16000, 125);
 INSERT OR REPLACE INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - 1080p-2160p Plex Series', 'Sonarr');
