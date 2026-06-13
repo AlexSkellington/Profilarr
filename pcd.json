@@ -1,6 +1,6 @@
 {
   "name": "Alex_C.T",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Alejandro's modular Smart Plex managed library database for Radarr and Sonarr, with categorized custom formats, additive individual-bonus movie and series profiles, media-management settings, quality definitions, a delay profile, and series-only size guards.",
   "arr_types": [
     "radarr",
