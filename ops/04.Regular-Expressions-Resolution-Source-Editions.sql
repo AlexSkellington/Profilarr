@@ -41,6 +41,10 @@ INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES (
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('480p: WEBRip Source', 'Media Server');
 INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('480p: BDRip Source', '(?i)^(?=.*\b480p\b)(?!.*\b(?:576p|720p|1080p|2160p|4k)\b)(?=.*\b(?:bd[ ._-]?rip|bdrip)\b).*$', '480p-only BDRip source detector for relaxed fallback scoring.');
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('480p: BDRip Source', 'Media Server');
+INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Size Guard: 1080p Only Marker', '(?i)^(?=.*\b1080p\b)(?!.*\b(?:2160p|4k)\b).*$', 'Matches 1080p releases while excluding true 2160p or 4K releases.');
+INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Size Guard: 1080p Only Marker', 'Size Guards');
+INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Size Guard: 4K Marker', '(?i)^(?=.*\b(?:2160p|4k)\b).*$','Matches releases tagged as 2160p or 4K.');
+INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Size Guard: 4K Marker', 'Size Guards');
 INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('4K: Block x264-H264', '(?i)^(?=.*\b(?:2160p|4k)\b)(?=.*\b(?:avc|[xh][ ._-]?264)\b).*$', 'Optional strict detector for 4K or 2160p releases encoded as x264, H.264, or AVC. The default additive profiles leave it unattached and instead let HEVC, AV1, or VVC win through positive bonuses.');
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('4K: Block x264-H264', 'HDR / 4K');
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('4K: Block x264-H264', 'Blocking');

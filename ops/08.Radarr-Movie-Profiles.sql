@@ -1,6 +1,6 @@
 ﻿-- Alex_C.T Media Server modular Profilarr v2 PCD operations.
 -- 08: Radarr movie quality profiles and custom-format scoring.
--- Requires 01 through 07 and 13 for the movie size-band gates.
+-- Requires 01 through 07.
 --
 -- Movie scoring philosophy:
 -- - No negative movie scores.

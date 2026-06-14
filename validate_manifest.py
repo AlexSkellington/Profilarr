@@ -23,7 +23,6 @@ REQUIRED_FILES = [
     "ops/10.Media-Management.sql",
     "ops/11.Delay-Profiles.sql",
     "ops/12.Series-Size-Guards.sql",
-    "ops/13.Movie-Size-Bands.sql",
 ]
 
 OLD_FILES = [
@@ -151,8 +150,8 @@ for label, pattern in checks.items():
 if "condition_sizes" not in read("ops/12.Series-Size-Guards.sql"):
     fail("Series size guard file should use condition_sizes")
 
-if "condition_sizes" not in read("ops/13.Movie-Size-Bands.sql"):
-    fail("Movie size band file should use condition_sizes")
+if "Size Band: 1080p Compact Eligible" not in read("ops/06.Custom-Formats-Codec-HDR-Audio-Resolution.sql"):
+    fail("Movie size bands should be defined before movie profiles in ops/06.Custom-Formats-Codec-HDR-Audio-Resolution.sql")
 
 if errors:
     print("Validation failed:")

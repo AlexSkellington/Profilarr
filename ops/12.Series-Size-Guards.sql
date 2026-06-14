@@ -11,20 +11,6 @@ INSERT OR IGNORE INTO tags (name) VALUES ('Size Guards');
 INSERT OR IGNORE INTO tags (name) VALUES ('Micro Encode');
 INSERT OR IGNORE INTO tags (name) VALUES ('Bitrate Guard');
 
-INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES (
-  'Size Guard: 1080p Only Marker',
-  '(?i)^(?=.*\b1080p\b)(?!.*\b(?:2160p|4k)\b).*$',
-  'Matches 1080p releases while excluding true 2160p or 4K releases.'
-);
-INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Size Guard: 1080p Only Marker', 'Size Guards');
-
-INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES (
-  'Size Guard: 4K Marker',
-  '(?i)^(?=.*\b(?:2160p|4k)\b).*$',
-  'Matches releases tagged as 2160p or 4K.'
-);
-INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Size Guard: 4K Marker', 'Size Guards');
-
 INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES (
   'Size Guard: 1080p Episode Tiny Encode',
   'Optional helper for 1080p episode releases under 300 MiB. Kept as a reusable suspiciously-tiny-TV detector, but left unattached in the default additive profiles.',

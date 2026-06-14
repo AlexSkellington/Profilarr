@@ -21,7 +21,6 @@ ops/09.Sonarr-Series-Profiles.sql
 ops/10.Media-Management.sql
 ops/11.Delay-Profiles.sql
 ops/12.Series-Size-Guards.sql
-ops/13.Movie-Size-Bands.sql
 ```
 
 GitHub paths are case-sensitive. Keep these filenames exactly as written.
@@ -33,14 +32,13 @@ GitHub paths are case-sensitive. Keep these filenames exactly as written.
 - `03.Regular-Expressions-Codecs-HDR-Audio.sql`: HEVC/AV1/VVC/x264, HDR/DV, and audio rules, including lossless-audio detection.
 - `04.Regular-Expressions-Resolution-Source-Editions.sql`: resolution-specific source rules, 4K gates, editions, and release fixes.
 - `05.Custom-Formats-Language-Subtitles.sql`: language and subtitle custom formats, tags, conditions, and regex bindings.
-- `06.Custom-Formats-Codec-HDR-Audio-Resolution.sql`: codec, HDR, audio, lossless-audio, and resolution/source custom formats.
+- `06.Custom-Formats-Codec-HDR-Audio-Resolution.sql`: codec, HDR, audio, lossless-audio, resolution/source, and movie size-band custom formats.
 - `07.Custom-Formats-Source-Editions-Releases.sql`: source, edition, and release-fix custom formats.
 - `08.Radarr-Movie-Profiles.sql`: Radarr movie profiles for Compact, Premium, Remux, and Catalog lanes.
 - `09.Sonarr-Series-Profiles.sql`: Sonarr series profiles with additive scoring.
 - `10.Media-Management.sql`: Radarr/Sonarr naming, media settings, and quality definitions.
 - `11.Delay-Profiles.sql`: Usenet-first delay profile.
 - `12.Series-Size-Guards.sql`: optional series-only size helper formats for suspiciously tiny TV releases.
-- `13.Movie-Size-Bands.sql`: required movie size-band helpers used by the Compact, Premium, and Remux movie profiles.
 
 ## Movie profile set
 
