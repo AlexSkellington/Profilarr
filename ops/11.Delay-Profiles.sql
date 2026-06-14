@@ -1,4 +1,4 @@
--- Alex_C.T Smart Plex modular Profilarr v2 PCD operations.
+﻿-- Alex_C.T Media Server modular Profilarr v2 PCD operations.
 -- 09: Usenet-first delay profile.
 -- Requires no previous ops files, but import after the core/profile ops for readability.
 
@@ -16,7 +16,7 @@ INSERT OR REPLACE INTO delay_profiles (
   bypass_if_above_custom_format_score,
   minimum_custom_format_score
 ) VALUES (
-  'Alex_CT Smart Plex Usenet Preferred Delay',
+  'Alex_CT Media Server Usenet Preferred Delay',
   'prefer_usenet',
   0,
   60,
@@ -24,3 +24,4 @@ INSERT OR REPLACE INTO delay_profiles (
   0,
   NULL
 );
+

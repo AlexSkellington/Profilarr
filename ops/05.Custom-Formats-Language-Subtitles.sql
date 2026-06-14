@@ -1,8 +1,8 @@
--- Alex_C.T Smart Plex modular Profilarr v2 PCD operations.
+﻿-- Alex_C.T Media Server modular Profilarr v2 PCD operations.
 -- 05: Language and subtitle custom formats, tags, conditions, and regex bindings.
 -- Requires 01 through 04.
 
-INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('Language: Prefer English + Spanish', 'Highest language preference. Rewards releases that appear to include both English and Spanish/Latino language indicators, or a strong Latino/multi-audio signal, so Plex gets the best bilingual copy first.', 0);
+INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('Language: Prefer English + Spanish', 'Highest language preference. Rewards releases that appear to include both English and Spanish/Latino language indicators, or a strong Latino/multi-audio signal, so the shared media-server library gets the best bilingual copy first.', 0);
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Language: Prefer English + Spanish', 'Language');
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Language: Prefer English + Spanish', 'Language: Prefer English + Spanish', 'release_title', 'all', 0, 1);
 INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('Language: Prefer English + Spanish', 'Language: Prefer English + Spanish', 'Language: Prefer English + Spanish');
@@ -48,7 +48,7 @@ INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES 
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Language: Block Other Languages', 'Language: Block Other Languages', 'release_title', 'all', 0, 1);
 INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('Language: Block Other Languages', 'Language: Block Other Languages', 'Language: Block Other Languages');
 
-INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('Subtitles: Prefer English + Spanish', 'Rewards releases that appear to include subtitle support for both English and Spanish. This is a strong usability bonus for mixed-language Plex playback.', 0);
+INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('Subtitles: Prefer English + Spanish', 'Rewards releases that appear to include subtitle support for both English and Spanish. This is a strong usability bonus for mixed-language media-server playback.', 0);
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Subtitles: Prefer English + Spanish', 'Subtitles');
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Subtitles: Prefer English + Spanish', 'Subtitles: Prefer English + Spanish', 'release_title', 'all', 0, 1);
 INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('Subtitles: Prefer English + Spanish', 'Subtitles: Prefer English + Spanish', 'Subtitles: Prefer English + Spanish');
@@ -70,3 +70,5 @@ INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES 
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Subtitles: Block Hardcoded-Burned-In', 'Blocking');
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Subtitles: Block Hardcoded-Burned-In', 'Subtitles: Block Hardcoded-Burned-In', 'release_title', 'all', 0, 1);
 INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('Subtitles: Block Hardcoded-Burned-In', 'Subtitles: Block Hardcoded-Burned-In', 'Subtitles: Block Hardcoded-Burned-In');
+
+

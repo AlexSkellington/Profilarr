@@ -23,6 +23,7 @@ REQUIRED_FILES = [
     "ops/10.Media-Management.sql",
     "ops/11.Delay-Profiles.sql",
     "ops/12.Series-Size-Guards.sql",
+    "ops/13.Movie-Size-Bands.sql",
 ]
 
 OLD_FILES = [
@@ -40,12 +41,16 @@ OLD_FILES = [
 ]
 
 EXPECTED_PROFILES = [
-    "Alex_C.T - 1080p Plex Movies",
-    "Alex_C.T - 4K Plex Movies",
-    "Alex_C.T - Catalog 480p-1080p Plex Movies",
-    "Alex_C.T - 1080p-2160p Plex Series",
-    "Alex_C.T - 4K Plex Series",
-    "Alex_C.T - Catalog 480p-1080p Plex Series",
+    "Alex_C.T - Compact 1080p Movies",
+    "Alex_C.T - Premium 1080p Movies",
+    "Alex_C.T - Remux 1080p Movies",
+    "Alex_C.T - Compact 4K Movies",
+    "Alex_C.T - Premium 4K Movies",
+    "Alex_C.T - Remux 4K Movies",
+    "Alex_C.T - Catalog 480p-1080p Movies",
+    "Alex_C.T - 1080p-2160p Series",
+    "Alex_C.T - 4K Series",
+    "Alex_C.T - Catalog 480p-1080p Series",
 ]
 
 EXPECTED_SERIES_SIZE_GUARDS = [
@@ -53,13 +58,25 @@ EXPECTED_SERIES_SIZE_GUARDS = [
     "Size Guard: 4K Episode Tiny Encode",
 ]
 
+EXPECTED_MOVIE_SIZE_BANDS = [
+    "Size Band: 1080p Compact Eligible",
+    "Size Band: 1080p Premium Eligible",
+    "Size Band: 1080p Remux Eligible",
+    "Size Band: 4K Compact Eligible",
+    "Size Band: 4K Premium Eligible",
+    "Size Band: 4K Remux Eligible",
+]
+
 errors = []
+
 
 def fail(message):
     errors.append(message)
 
+
 def read(path):
     return (ROOT / path).read_text(encoding="utf-8")
+
 
 for rel in REQUIRED_FILES:
     if not (ROOT / rel).exists():
@@ -98,25 +115,34 @@ for guard in EXPECTED_SERIES_SIZE_GUARDS:
     if guard not in combined:
         fail(f"Missing expected series size guard: {guard}")
 
+for band in EXPECTED_MOVIE_SIZE_BANDS:
+    if band not in combined:
+        fail(f"Missing expected movie size band: {band}")
+
 required_markers = [
     "Language: Prefer English + Spanish",
     "Codec: HEVC-x265 Preferred",
     "HDR: Dolby Vision + HDR Bonus",
     "Audio: 5.1 Surround Preferred",
+    "Audio: Lossless Track Bonus",
     "4K Gate: Block Missing HDR",
-    "Alex_CT Smart Plex Radarr Quality Definitions",
-    "Alex_CT Smart Plex Sonarr Quality Definitions",
-    "Alex_CT Smart Plex Usenet Preferred Delay",
+    "Alex_CT Media Server Radarr Quality Definitions",
+    "Alex_CT Media Server Sonarr Quality Definitions",
+    "Alex_CT Media Server Usenet Preferred Delay",
 ]
 for marker in required_markers:
     if marker not in combined:
         fail(f"Missing expected marker: {marker}")
 
 checks = {
-    "1080p movie cutoff is Bluray-1080p": r"Alex_C\.T - 1080p Plex Movies'.*?'Bluray-1080p'.*?upgrade_until\) VALUES .*?, 1\)",
-    "4K movie cutoff is Bluray-2160p": r"Alex_C\.T - 4K Plex Movies'.*?'Bluray-2160p'.*?upgrade_until\) VALUES .*?, 1\)",
-    "1080p series cutoff is Bluray-1080p": r"Alex_C\.T - 1080p-2160p Plex Series'.*?'Bluray-1080p'.*?upgrade_until\) VALUES .*?, 1\)",
-    "4K series cutoff is Bluray-2160p": r"Alex_C\.T - 4K Plex Series'.*?'Bluray-2160p'.*?upgrade_until\) VALUES .*?, 1\)",
+    "compact 1080p movie cutoff is Bluray-1080p": r"Alex_C\.T - Compact 1080p Movies'.*?'Bluray-1080p'.*?upgrade_until\) VALUES .*?, 1\)",
+    "premium 1080p movie cutoff is Bluray-1080p": r"Alex_C\.T - Premium 1080p Movies'.*?'Bluray-1080p'.*?upgrade_until\) VALUES .*?, 1\)",
+    "remux 1080p movie cutoff is Remux-1080p": r"Alex_C\.T - Remux 1080p Movies'.*?'Remux-1080p'.*?upgrade_until\) VALUES .*?, 1\)",
+    "compact 4K movie cutoff is Bluray-2160p": r"Alex_C\.T - Compact 4K Movies'.*?'Bluray-2160p'.*?upgrade_until\) VALUES .*?, 1\)",
+    "premium 4K movie cutoff is Bluray-2160p": r"Alex_C\.T - Premium 4K Movies'.*?'Bluray-2160p'.*?upgrade_until\) VALUES .*?, 1\)",
+    "remux 4K movie cutoff is Remux-2160p": r"Alex_C\.T - Remux 4K Movies'.*?'Remux-2160p'.*?upgrade_until\) VALUES .*?, 1\)",
+    "1080p series cutoff is Bluray-1080p": r"Alex_C\.T - 1080p-2160p Series'.*?'Bluray-1080p'.*?upgrade_until\) VALUES .*?, 1\)",
+    "4K series cutoff is Bluray-2160p": r"Alex_C\.T - 4K Series'.*?'Bluray-2160p'.*?upgrade_until\) VALUES .*?, 1\)",
 }
 for label, pattern in checks.items():
     if not re.search(pattern, combined, flags=re.S):
@@ -125,10 +151,13 @@ for label, pattern in checks.items():
 if "condition_sizes" not in read("ops/12.Series-Size-Guards.sql"):
     fail("Series size guard file should use condition_sizes")
 
+if "condition_sizes" not in read("ops/13.Movie-Size-Bands.sql"):
+    fail("Movie size band file should use condition_sizes")
+
 if errors:
     print("Validation failed:")
     for err in errors:
         print(f" - {err}")
     sys.exit(1)
 
-print("Modular Smart Plex PCD checks passed.")
+print("Modular media-server PCD checks passed.")

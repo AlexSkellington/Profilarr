@@ -1,4 +1,4 @@
--- Alex_C.T Smart Plex modular Profilarr v2 PCD operations.
+﻿-- Alex_C.T Media Server modular Profilarr v2 PCD operations.
 -- 12: Series-only size-based micro-encode helpers.
 -- Import last, after the profiles exist.
 --
@@ -48,3 +48,4 @@ INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type,
 INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('Size Guard: 4K Episode Tiny Encode', '4K marker', 'Size Guard: 4K Marker');
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Size Guard: 4K Episode Tiny Encode', 'size <= 800 MiB', 'size', 'all', 0, 1);
 INSERT OR REPLACE INTO condition_sizes (custom_format_name, condition_name, min_bytes, max_bytes) VALUES ('Size Guard: 4K Episode Tiny Encode', 'size <= 800 MiB', NULL, 838860800);
+

@@ -1,4 +1,4 @@
--- Alex_C.T Smart Plex modular Profilarr v2 PCD operations.
+﻿-- Alex_C.T Media Server modular Profilarr v2 PCD operations.
 -- 01: Core tags, languages, and quality names.
 -- Import first.
 --
@@ -8,7 +8,7 @@
 -- which cascades into quality_api_mappings and prevents Profilarr from mapping
 -- most quality definitions to Radarr/Sonarr.
 
-INSERT OR IGNORE INTO tags (name) VALUES ('Smart Plex');
+INSERT OR IGNORE INTO tags (name) VALUES ('Media Server');
 INSERT OR IGNORE INTO tags (name) VALUES ('Language');
 INSERT OR IGNORE INTO tags (name) VALUES ('Subtitles');
 INSERT OR IGNORE INTO tags (name) VALUES ('Codec');
@@ -23,6 +23,9 @@ INSERT OR IGNORE INTO tags (name) VALUES ('Sonarr');
 INSERT OR IGNORE INTO tags (name) VALUES ('1080p');
 INSERT OR IGNORE INTO tags (name) VALUES ('4K');
 INSERT OR IGNORE INTO tags (name) VALUES ('Catalog');
+INSERT OR IGNORE INTO tags (name) VALUES ('Compact');
+INSERT OR IGNORE INTO tags (name) VALUES ('Premium');
+INSERT OR IGNORE INTO tags (name) VALUES ('Remux');
 INSERT OR IGNORE INTO tags (name) VALUES ('720p');
 INSERT OR IGNORE INTO tags (name) VALUES ('Archive');
 INSERT OR IGNORE INTO tags (name) VALUES ('Editions');
@@ -64,3 +67,4 @@ INSERT OR IGNORE INTO qualities (name) VALUES ('Remux-1080p');
 INSERT OR IGNORE INTO qualities (name) VALUES ('Remux-2160p');
 INSERT OR IGNORE INTO qualities (name) VALUES ('BR-DISK');
 INSERT OR IGNORE INTO qualities (name) VALUES ('Raw-HD');
+

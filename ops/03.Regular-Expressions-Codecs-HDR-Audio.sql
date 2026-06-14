@@ -1,4 +1,4 @@
--- Alex_C.T Smart Plex modular Profilarr v2 PCD operations.
+﻿-- Alex_C.T Media Server modular Profilarr v2 PCD operations.
 -- 03: Codec, HDR, and audio regular expressions.
 -- Requires 01.Core-Tags-Languages-Qualities.sql.
 
@@ -41,13 +41,13 @@ INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_nam
 INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Audio: Surround Bonus', '(?i)\b(?:5[ ._-]?1|6[ ._-]?1|7[ ._-]?1|6ch|7ch|8ch|5\.1ch|6\.1ch|7\.1ch|dolby[ ._-]?atmos|ddp[ ._-]?atmos|ec3[ ._-]?joc|atmos|dts(?:[ ._-]?hd)?(?:[ ._-]?ma)?|truehd|true[ ._-]?hd)\b', 'Standalone surround-audio signal for movie scoring. Matches explicit 5.1+ channel layouts plus Atmos, DTS-HD, and TrueHD style markers without bundling the score together with HDR or codec rules.');
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Audio: Surround Bonus', 'Audio');
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Audio: Surround Bonus', 'Scoring');
-INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Audio: 5.1 Surround Preferred', '(?i)\b(?:5[ ._-]?1|6ch|5\.1ch)\b', 'Primary surround-audio bonus for 5.1, 6-channel, and 5.1ch tags. This is the main compatibility target for a Plex setup built around a 5.1-capable soundbar.');
+INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Audio: 5.1 Surround Preferred', '(?i)\b(?:5[ ._-]?1|6ch|5\.1ch)\b', 'Primary surround-audio bonus for 5.1, 6-channel, and 5.1ch tags. This is the main compatibility target for a shared media-server setup built around a 5.1-capable soundbar.');
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Audio: 5.1 Surround Preferred', 'Audio');
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Audio: 5.1 Surround Preferred', 'Scoring');
 INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Audio: Atmos Bonus', '(?i)\b(?:dolby[ ._-]?atmos|ddp[ ._-]?atmos|ec3[ ._-]?joc|atmos)\b', 'Top audio bonus for Dolby Atmos, DDP Atmos, EC3 JOC, and Atmos tags. Atmos is preferred when available because it still rides on a practical Dolby Digital Plus playback path.');
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Audio: Atmos Bonus', 'Audio');
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Audio: Atmos Bonus', 'Scoring');
-INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Audio: EAC3-AC3 Preferred', '(?i)\b(?:eac3|e-ac-3|ddp|dd\+|ac3|ac-3|dolby[ ._-]?digital[ ._-]?plus|dolby[ ._-]?digital)\b', 'Preferred Dolby audio-format bonus for EAC3, DDP, DD+, AC3, and Dolby Digital tags. These formats are highly compatible for Plex, eARC, and streaming-style playback.');
+INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Audio: EAC3-AC3 Preferred', '(?i)\b(?:eac3|e-ac-3|ddp|dd\+|ac3|ac-3|dolby[ ._-]?digital[ ._-]?plus|dolby[ ._-]?digital)\b', 'Preferred Dolby audio-format bonus for EAC3, DDP, DD+, AC3, and Dolby Digital tags. These formats stay highly compatible for shared media-server, eARC, and streaming-style playback.');
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Audio: EAC3-AC3 Preferred', 'Audio');
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Audio: EAC3-AC3 Preferred', 'Scoring');
 INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Audio: 6.1 Bonus', '(?i)\b(?:6[ ._-]?1|7ch|6\.1ch)\b', 'Secondary channel-layout bonus for 6.1 audio. It stays below the main 5.1 and Dolby-format preferences, but above 7.1 and stereo in the fallback ladder.');
@@ -65,3 +65,8 @@ INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_nam
 INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Audio: Lossless Size Penalty', '(?i)\b(?:truehd|true[ ._-]?hd|dts[ ._-]?hd|dts[ ._-]?ma|dts[ ._-]?hd[ ._-]?ma|flac|pcm|lpcm)\b', 'Optional space-awareness detector for TrueHD, DTS-HD MA, FLAC, PCM, and LPCM. The default additive profiles leave it unattached, but stricter profiles can still use it when lossless audio starts inflating files too far above practical EAC3/AC3 releases.');
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Audio: Lossless Size Penalty', 'Audio');
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Audio: Lossless Size Penalty', 'Blocking');
+INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Audio: Lossless Track Bonus', '(?i)\b(?:truehd|true[ ._-]?hd|dts[ ._-]?hd|dts[ ._-]?ma|dts[ ._-]?hd[ ._-]?ma|flac|pcm|lpcm)\b', 'Positive premium-audio detector for TrueHD, DTS-HD MA, FLAC, PCM, and LPCM. Premium and remux movie profiles can use it to reward near-remux style releases that carry lossless tracks without requiring a full remux.');
+INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Audio: Lossless Track Bonus', 'Audio');
+INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Audio: Lossless Track Bonus', 'Scoring');
+
+

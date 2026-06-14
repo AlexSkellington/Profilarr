@@ -1,4 +1,4 @@
--- Alex_C.T Smart Plex modular Profilarr v2 PCD operations.
+﻿-- Alex_C.T Media Server modular Profilarr v2 PCD operations.
 -- 06: Codec, HDR, audio, and resolution/source custom formats.
 -- Requires 01 through 04.
 
@@ -86,7 +86,7 @@ INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES 
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Audio: Surround Bonus', 'Audio: Surround Bonus', 'release_title', 'all', 0, 1);
 INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('Audio: Surround Bonus', 'Audio: Surround Bonus', 'Audio: Surround Bonus');
 
-INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('Audio: 5.1 Surround Preferred', 'Primary surround-audio bonus for 5.1, 6-channel, and 5.1ch tags. This is the main compatibility target for a Plex setup built around a 5.1-capable soundbar.', 0);
+INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('Audio: 5.1 Surround Preferred', 'Primary surround-audio bonus for 5.1, 6-channel, and 5.1ch tags. This is the main compatibility target for a shared media-server setup built around a 5.1-capable soundbar.', 0);
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Audio: 5.1 Surround Preferred', 'Audio');
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Audio: 5.1 Surround Preferred', 'Scoring');
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Audio: 5.1 Surround Preferred', 'Audio: 5.1 Surround Preferred', 'release_title', 'all', 0, 1);
@@ -98,7 +98,7 @@ INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES 
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Audio: Atmos Bonus', 'Audio: Atmos Bonus', 'release_title', 'all', 0, 1);
 INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('Audio: Atmos Bonus', 'Audio: Atmos Bonus', 'Audio: Atmos Bonus');
 
-INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('Audio: EAC3-AC3 Preferred', 'Preferred Dolby audio-format bonus for EAC3, DDP, DD+, AC3, and Dolby Digital tags. These formats are highly compatible for Plex, eARC, and streaming-style playback.', 0);
+INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('Audio: EAC3-AC3 Preferred', 'Preferred Dolby audio-format bonus for EAC3, DDP, DD+, AC3, and Dolby Digital tags. These formats stay highly compatible for shared media-server, eARC, and streaming-style playback.', 0);
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Audio: EAC3-AC3 Preferred', 'Audio');
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Audio: EAC3-AC3 Preferred', 'Scoring');
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Audio: EAC3-AC3 Preferred', 'Audio: EAC3-AC3 Preferred', 'release_title', 'all', 0, 1);
@@ -134,6 +134,12 @@ INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES 
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Audio: Lossless Size Penalty', 'Audio: Lossless Size Penalty', 'release_title', 'all', 0, 1);
 INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('Audio: Lossless Size Penalty', 'Audio: Lossless Size Penalty', 'Audio: Lossless Size Penalty');
 
+INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('Audio: Lossless Track Bonus', 'Positive premium-audio detector for TrueHD, DTS-HD MA, FLAC, PCM, and LPCM. Premium and remux movie profiles can use it to reward near-remux style releases that carry lossless tracks without requiring a full remux.', 0);
+INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Audio: Lossless Track Bonus', 'Audio');
+INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Audio: Lossless Track Bonus', 'Scoring');
+INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Audio: Lossless Track Bonus', 'Audio: Lossless Track Bonus', 'release_title', 'all', 0, 1);
+INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('Audio: Lossless Track Bonus', 'Audio: Lossless Track Bonus', 'Audio: Lossless Track Bonus');
+
 INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('1080p: UHD BluRay Source Bonus', 'Small positive score for 1080p encodes sourced from UHD BluRay. This replaces the old accidental 4K bonus on 1080p UHD-source releases, so they get credit for the cleaner source without being treated as true 4K.', 0);
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('1080p: UHD BluRay Source Bonus', 'Scoring');
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('1080p: UHD BluRay Source Bonus', '1080p: UHD BluRay Source Bonus', 'release_title', 'all', 0, 1);
@@ -150,12 +156,12 @@ INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type,
 INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('1080p: WEB-DL Preferred', '1080p: WEB-DL Preferred', '1080p: WEB-DL Preferred');
 
 INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('1080p: WEBRip Source', '1080p-only WEBRip source detector. Strict movie profiles can penalize or block it, while relaxed catalog and series profiles can keep it as a weaker fallback without borrowing generic or 4K source formats.', 0);
-INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('1080p: WEBRip Source', 'Smart Plex');
+INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('1080p: WEBRip Source', 'Media Server');
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('1080p: WEBRip Source', '1080p: WEBRip Source', 'release_title', 'all', 0, 1);
 INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('1080p: WEBRip Source', '1080p: WEBRip Source', '1080p: WEBRip Source');
 
 INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('1080p: BDRip Source', '1080p-only BDRip source detector. It keeps 1080p BDRip handling separate from true BluRay and from 4K source rules.', 0);
-INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('1080p: BDRip Source', 'Smart Plex');
+INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('1080p: BDRip Source', 'Media Server');
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('1080p: BDRip Source', '1080p: BDRip Source', 'release_title', 'all', 0, 1);
 INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('1080p: BDRip Source', '1080p: BDRip Source', '1080p: BDRip Source');
 
@@ -170,12 +176,12 @@ INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type,
 INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('720p: WEB-DL Preferred', '720p: WEB-DL Preferred', '720p: WEB-DL Preferred');
 
 INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('720p: WEBRip Source', '720p-only WEBRip source detector for relaxed catalog fallbacks. It does not apply to 1080p or 4K titles.', 0);
-INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('720p: WEBRip Source', 'Smart Plex');
+INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('720p: WEBRip Source', 'Media Server');
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('720p: WEBRip Source', '720p: WEBRip Source', 'release_title', 'all', 0, 1);
 INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('720p: WEBRip Source', '720p: WEBRip Source', '720p: WEBRip Source');
 
 INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('720p: BDRip Source', '720p-only BDRip source detector for older or hard-to-find catalog releases.', 0);
-INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('720p: BDRip Source', 'Smart Plex');
+INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('720p: BDRip Source', 'Media Server');
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('720p: BDRip Source', '720p: BDRip Source', 'release_title', 'all', 0, 1);
 INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('720p: BDRip Source', '720p: BDRip Source', '720p: BDRip Source');
 
@@ -190,12 +196,12 @@ INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type,
 INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('576p: WEB-DL Preferred', '576p: WEB-DL Preferred', '576p: WEB-DL Preferred');
 
 INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('576p: WEBRip Source', '576p-only WEBRip source detector for archive/catalog scoring.', 0);
-INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('576p: WEBRip Source', 'Smart Plex');
+INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('576p: WEBRip Source', 'Media Server');
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('576p: WEBRip Source', '576p: WEBRip Source', 'release_title', 'all', 0, 1);
 INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('576p: WEBRip Source', '576p: WEBRip Source', '576p: WEBRip Source');
 
 INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('576p: BDRip Source', '576p-only BDRip source detector for archive/catalog scoring.', 0);
-INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('576p: BDRip Source', 'Smart Plex');
+INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('576p: BDRip Source', 'Media Server');
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('576p: BDRip Source', '576p: BDRip Source', 'release_title', 'all', 0, 1);
 INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('576p: BDRip Source', '576p: BDRip Source', '576p: BDRip Source');
 
@@ -210,12 +216,12 @@ INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type,
 INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('480p: WEB-DL Preferred', '480p: WEB-DL Preferred', '480p: WEB-DL Preferred');
 
 INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('480p: WEBRip Source', '480p-only WEBRip source detector for relaxed fallback scoring.', 0);
-INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('480p: WEBRip Source', 'Smart Plex');
+INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('480p: WEBRip Source', 'Media Server');
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('480p: WEBRip Source', '480p: WEBRip Source', 'release_title', 'all', 0, 1);
 INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('480p: WEBRip Source', '480p: WEBRip Source', '480p: WEBRip Source');
 
 INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('480p: BDRip Source', '480p-only BDRip source detector for relaxed fallback scoring.', 0);
-INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('480p: BDRip Source', 'Smart Plex');
+INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('480p: BDRip Source', 'Media Server');
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('480p: BDRip Source', '480p: BDRip Source', 'release_title', 'all', 0, 1);
 INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('480p: BDRip Source', '480p: BDRip Source', '480p: BDRip Source');
 
@@ -261,3 +267,6 @@ INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES 
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('4K Gate: Block Missing 5.1+ Surround', 'Blocking');
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('4K Gate: Block Missing 5.1+ Surround', '4K Gate: Block Missing 5.1+ Surround', 'release_title', 'all', 0, 1);
 INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('4K Gate: Block Missing 5.1+ Surround', '4K Gate: Block Missing 5.1+ Surround', '4K Gate: Block Missing 5.1+ Surround');
+
+
+
