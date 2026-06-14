@@ -243,14 +243,14 @@ INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, r
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Size Band: 1080p Premium Eligible', '7.5 GiB to 24 GiB', 'size', 'all', 0, 1);
 INSERT OR REPLACE INTO condition_sizes (custom_format_name, condition_name, min_bytes, max_bytes) VALUES ('Size Band: 1080p Premium Eligible', '7.5 GiB to 24 GiB', 8053063680, 25769803776);
 
-INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('Size Band: 1080p Remux Eligible', 'Mandatory helper for remux-first 1080p movie profiles. Matches 1080p releases from about 18 GiB upward so the remux lane stays open to true remuxes and very large premium encodes.', 0);
+INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('Size Band: 1080p Remux Eligible', 'Mandatory helper for remux-first 1080p movie profiles. Matches 1080p releases between about 18 GiB and 400 GiB so the remux lane stays open to true remuxes and very large premium encodes without relying on an open-ended size condition.', 0);
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Size Band: 1080p Remux Eligible', 'Size Bands');
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Size Band: 1080p Remux Eligible', 'Movie Size Guards');
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Size Band: 1080p Remux Eligible', 'Remux');
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Size Band: 1080p Remux Eligible', '1080p marker', 'release_title', 'all', 0, 1);
 INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('Size Band: 1080p Remux Eligible', '1080p marker', 'Size Guard: 1080p Only Marker');
-INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Size Band: 1080p Remux Eligible', '18 GiB and up', 'size', 'all', 0, 1);
-INSERT OR REPLACE INTO condition_sizes (custom_format_name, condition_name, min_bytes, max_bytes) VALUES ('Size Band: 1080p Remux Eligible', '18 GiB and up', 19327352832, NULL);
+INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Size Band: 1080p Remux Eligible', '18 GiB to 400 GiB', 'size', 'all', 0, 1);
+INSERT OR REPLACE INTO condition_sizes (custom_format_name, condition_name, min_bytes, max_bytes) VALUES ('Size Band: 1080p Remux Eligible', '18 GiB to 400 GiB', 19327352832, 429496729600);
 
 INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('Size Band: 4K Compact Eligible', 'Mandatory helper for compact 4K movie profiles. Matches 2160p or 4K releases between about 8 GiB and 22 GiB so compact 4K stays noticeably leaner than the premium and remux lanes.', 0);
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Size Band: 4K Compact Eligible', 'Size Bands');
@@ -270,14 +270,14 @@ INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, r
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Size Band: 4K Premium Eligible', '18 GiB to 50 GiB', 'size', 'all', 0, 1);
 INSERT OR REPLACE INTO condition_sizes (custom_format_name, condition_name, min_bytes, max_bytes) VALUES ('Size Band: 4K Premium Eligible', '18 GiB to 50 GiB', 19327352832, 53687091200);
 
-INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('Size Band: 4K Remux Eligible', 'Mandatory helper for remux-first 4K movie profiles. Matches 2160p or 4K releases from about 35 GiB upward so the remux lane stays open to true remuxes and very large premium encodes.', 0);
+INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('Size Band: 4K Remux Eligible', 'Mandatory helper for remux-first 4K movie profiles. Matches 2160p or 4K releases between about 35 GiB and 500 GiB so the remux lane stays open to true remuxes and very large premium encodes without relying on an open-ended size condition.', 0);
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Size Band: 4K Remux Eligible', 'Size Bands');
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Size Band: 4K Remux Eligible', 'Movie Size Guards');
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Size Band: 4K Remux Eligible', 'Remux');
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Size Band: 4K Remux Eligible', '4K marker', 'release_title', 'all', 0, 1);
 INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('Size Band: 4K Remux Eligible', '4K marker', 'Size Guard: 4K Marker');
-INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Size Band: 4K Remux Eligible', '35 GiB and up', 'size', 'all', 0, 1);
-INSERT OR REPLACE INTO condition_sizes (custom_format_name, condition_name, min_bytes, max_bytes) VALUES ('Size Band: 4K Remux Eligible', '35 GiB and up', 37580963840, NULL);
+INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Size Band: 4K Remux Eligible', '35 GiB to 500 GiB', 'size', 'all', 0, 1);
+INSERT OR REPLACE INTO condition_sizes (custom_format_name, condition_name, min_bytes, max_bytes) VALUES ('Size Band: 4K Remux Eligible', '35 GiB to 500 GiB', 37580963840, 536870912000);
 
 INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('4K: Block x264-H264', 'Optional strict 4K detector for 2160p releases encoded as x264, H.264, or AVC. Additive movie profiles can skip it, while stricter profiles can still reserve 4K for HEVC, AV1, or VVC.', 0);
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('4K: Block x264-H264', 'HDR / 4K');

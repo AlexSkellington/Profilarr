@@ -153,6 +153,13 @@ if "condition_sizes" not in read("ops/12.Series-Size-Guards.sql"):
 if "Size Band: 1080p Compact Eligible" not in read("ops/06.Custom-Formats-Codec-HDR-Audio-Resolution.sql"):
     fail("Movie size bands should be defined before movie profiles in ops/06.Custom-Formats-Codec-HDR-Audio-Resolution.sql")
 
+movie_size_bands = read("ops/06.Custom-Formats-Codec-HDR-Audio-Resolution.sql")
+if "Size Band: 1080p Remux Eligible', '18 GiB and up'" in movie_size_bands or "Size Band: 4K Remux Eligible', '35 GiB and up'" in movie_size_bands:
+    fail("Movie remux size bands should use explicit upper bounds instead of open-ended size conditions")
+
+if re.search(r"Size Band: (?:1080p|4K) Remux Eligible'.*?condition_sizes .*?, NULL\);", movie_size_bands, flags=re.S):
+    fail("Movie remux size bands should not use NULL max_bytes values")
+
 if errors:
     print("Validation failed:")
     for err in errors:

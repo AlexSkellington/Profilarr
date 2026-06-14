@@ -1,6 +1,6 @@
 {
   "name": "Alex_C.T",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "Alejandro's modular media-server library database for Radarr and Sonarr, with categorized custom formats, additive movie and series scoring, Compact/Premium/Remux movie profiles, media-management settings, quality definitions, a delay profile, and optional size-band helpers.",
   "arr_types": [
     "radarr",
