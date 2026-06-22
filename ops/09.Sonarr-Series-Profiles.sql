@@ -70,15 +70,15 @@ INSERT INTO quality_group_members (quality_profile_name, quality_group_name, qua
 INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - Best 1080p Series', 'Feature-Rich 1080p', 'WEBDL-1080p');
 INSERT INTO quality_profile_qualities (quality_profile_name, quality_group_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Best 1080p Series', 'Feature-Rich 1080p', 1, 1, 1);
 
-INSERT INTO quality_profiles (name, description, upgrades_allowed, minimum_custom_format_score, upgrade_until_score, upgrade_score_increment) VALUES ('Alex_C.T - 4K Series', 'Resolution-specific feature-first series profile. It compares 2160p Remux, BluRay, and WEB-DL releases by technical richness and keeps every accepted episode at 4K.', 1, 0, 10000, 100);
-INSERT INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - 4K Series', 'Sonarr');
-INSERT INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - 4K Series', 'Series');
-INSERT INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - 4K Series', '4K');
-INSERT INTO quality_groups (quality_profile_name, name) VALUES ('Alex_C.T - 4K Series', 'Feature-Rich 4K');
-INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - 4K Series', 'Feature-Rich 4K', 'Remux-2160p');
-INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - 4K Series', 'Feature-Rich 4K', 'Bluray-2160p');
-INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - 4K Series', 'Feature-Rich 4K', 'WEBDL-2160p');
-INSERT INTO quality_profile_qualities (quality_profile_name, quality_group_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - 4K Series', 'Feature-Rich 4K', 1, 1, 1);
+INSERT INTO quality_profiles (name, description, upgrades_allowed, minimum_custom_format_score, upgrade_until_score, upgrade_score_increment) VALUES ('Alex_C.T - Best 4K Series', 'Resolution-specific feature-first series profile. It compares 2160p Remux, BluRay, and WEB-DL releases by technical richness and keeps every accepted episode at 4K.', 1, 0, 10000, 100);
+INSERT INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Best 4K Series', 'Sonarr');
+INSERT INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Best 4K Series', 'Series');
+INSERT INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Best 4K Series', '4K');
+INSERT INTO quality_groups (quality_profile_name, name) VALUES ('Alex_C.T - Best 4K Series', 'Feature-Rich 4K');
+INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - Best 4K Series', 'Feature-Rich 4K', 'Remux-2160p');
+INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - Best 4K Series', 'Feature-Rich 4K', 'Bluray-2160p');
+INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - Best 4K Series', 'Feature-Rich 4K', 'WEBDL-2160p');
+INSERT INTO quality_profile_qualities (quality_profile_name, quality_group_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Best 4K Series', 'Feature-Rich 4K', 1, 1, 1);
 
 INSERT INTO quality_profiles (name, description, upgrades_allowed, minimum_custom_format_score, upgrade_until_score, upgrade_score_increment) VALUES ('Alex_C.T - Catalog 480p-1080p Series', 'Relaxed series profile for older and scarce shows. It accepts DVD through 1080p, climbs by resolution and source quality, and uses the same feature-rich priorities as the primary series profiles.', 1, 0, 10000, 100);
 INSERT INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Catalog 480p-1080p Series', 'Sonarr');
@@ -154,7 +154,7 @@ INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_
 SELECT 'Alex_C.T - Best 1080p Series', custom_format_name, arr_type, score
 FROM quality_profile_custom_formats WHERE quality_profile_name = 'Alex_C.T - 1080p-2160p Series';
 INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score)
-SELECT 'Alex_C.T - 4K Series', custom_format_name, arr_type, score
+SELECT 'Alex_C.T - Best 4K Series', custom_format_name, arr_type, score
 FROM quality_profile_custom_formats WHERE quality_profile_name = 'Alex_C.T - 1080p-2160p Series';
 INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score)
 SELECT 'Alex_C.T - Catalog 480p-1080p Series', custom_format_name, arr_type, score

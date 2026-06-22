@@ -58,7 +58,7 @@ MOVIE_PROFILES = {
 SERIES_PROFILES = {
     "Alex_C.T - 1080p-2160p Series",
     "Alex_C.T - Best 1080p Series",
-    "Alex_C.T - 4K Series",
+    "Alex_C.T - Best 4K Series",
     "Alex_C.T - Catalog 480p-1080p Series",
 }
 EXPECTED_PROFILES = MOVIE_PROFILES | SERIES_PROFILES
@@ -107,8 +107,8 @@ for key in ["name", "version", "description", "arr_types", "dependencies", "prof
     if key not in data:
         fail(f"pcd.json missing required key: {key}")
 
-if data.get("version") != "2.0.1":
-    fail("pcd.json version should be 2.0.1 for the compatibility-name fix")
+if data.get("version") != "2.0.2":
+    fail("pcd.json version should be 2.0.2 for the complete mapping compatibility fix")
 if sorted(data.get("arr_types", [])) != ["radarr", "sonarr"]:
     fail("pcd.json arr_types should be exactly ['radarr', 'sonarr']")
 if data.get("profilarr", {}).get("minimum_version") != "2.0.0":
@@ -270,7 +270,7 @@ if not errors:
         ("Alex_C.T - Best 4K Movies", "Feature-Rich 4K"): FEATURE_4K,
         ("Alex_C.T - 1080p-2160p Series", "Feature-Rich 1080p-2160p"): ALL_FEATURE_QUALITIES,
         ("Alex_C.T - Best 1080p Series", "Feature-Rich 1080p"): FEATURE_1080P,
-        ("Alex_C.T - 4K Series", "Feature-Rich 4K"): FEATURE_4K,
+        ("Alex_C.T - Best 4K Series", "Feature-Rich 4K"): FEATURE_4K,
     }
     for (profile, group), expected in expected_groups.items():
         actual = {
@@ -297,7 +297,7 @@ if not errors:
     for sibling in ["Alex_C.T - Best 1080p Movies", "Alex_C.T - Best 4K Movies"]:
         if score_map(sibling) != movie_scores:
             fail(f"{sibling} does not inherit the canonical movie score matrix")
-    for sibling in ["Alex_C.T - Best 1080p Series", "Alex_C.T - 4K Series"]:
+    for sibling in ["Alex_C.T - Best 1080p Series", "Alex_C.T - Best 4K Series"]:
         if score_map(sibling) != series_scores:
             fail(f"{sibling} does not inherit the canonical series score matrix")
 
