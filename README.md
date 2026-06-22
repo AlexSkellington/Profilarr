@@ -40,7 +40,7 @@ tuning does not require chasing definitions across multiple files.
 - `06`: Remux, BluRay, WEB-DL, weaker source detectors, and release fixes.
 - `07`: IMAX, cuts, restorations, labels, and other movie editions.
 - `08`: the four Radarr movie profiles and their shared score matrix.
-- `09`: the four Sonarr series profiles and their shared score matrix.
+- `09`: four primary Sonarr profiles, two mapping aliases, and one shared score matrix.
 - `10`: naming, media settings, and runtime-aware quality definitions.
 - `11`: the shared Usenet-first delay profile.
 - `12`: optional movie size bands and series tiny-release helpers.
@@ -63,9 +63,14 @@ tuning does not require chasing definitions across multiple files.
 - `Alex_C.T - Best 4K Series`: strict 2160p feature group.
 - `Alex_C.T - Catalog 480p-1080p Series`: relaxed archive/catalog ladder.
 
-The default series profile retains its established name so existing
-Profilarr database and Sonarr sync mappings continue resolving after the v2
-behavior upgrade.
+Two compatibility aliases keep mappings from both naming generations valid:
+
+- `Alex_C.T - Best Available Series`: alias of the default cross-resolution profile.
+- `Alex_C.T - 4K Series`: alias of `Alex_C.T - Best 4K Series`.
+
+The aliases clone the canonical series score matrix rather than maintaining
+separate scoring blocks. Database mappings can therefore use either name while
+all feature-score tuning remains centralized.
 
 ## Selection philosophy
 
