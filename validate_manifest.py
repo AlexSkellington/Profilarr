@@ -56,11 +56,9 @@ MOVIE_PROFILES = {
     "Alex_C.T - Catalog 480p-1080p Movies",
 }
 SERIES_PROFILES = {
-    "Alex_C.T - 1080p-2160p Series",
     "Alex_C.T - Best Available Series",
     "Alex_C.T - Best 1080p Series",
     "Alex_C.T - Best 4K Series",
-    "Alex_C.T - 4K Series",
     "Alex_C.T - Catalog 480p-1080p Series",
 }
 EXPECTED_PROFILES = MOVIE_PROFILES | SERIES_PROFILES
@@ -109,8 +107,8 @@ for key in ["name", "version", "description", "arr_types", "dependencies", "prof
     if key not in data:
         fail(f"pcd.json missing required key: {key}")
 
-if data.get("version") != "2.0.3":
-    fail("pcd.json version should be 2.0.3 for the profile alias compatibility fix")
+if data.get("version") != "3.0.0":
+    fail("pcd.json version should be 3.0.0 for the clean eight-profile rebuild")
 if sorted(data.get("arr_types", [])) != ["radarr", "sonarr"]:
     fail("pcd.json arr_types should be exactly ['radarr', 'sonarr']")
 if data.get("profilarr", {}).get("minimum_version") != "2.0.0":
@@ -131,7 +129,7 @@ profile_pattern = (
 defined_profiles = set(sql_names(profile_pattern, combined))
 if defined_profiles != EXPECTED_PROFILES:
     fail(
-        "Managed profile definitions differ from the expected ten: "
+        "Managed profile definitions differ from the expected eight: "
         f"missing={sorted(EXPECTED_PROFILES - defined_profiles)}, "
         f"extra={sorted(defined_profiles - EXPECTED_PROFILES)}"
     )
@@ -270,11 +268,9 @@ if not errors:
         ("Alex_C.T - Best Available Movies", "Feature-Rich 1080p-2160p"): ALL_FEATURE_QUALITIES,
         ("Alex_C.T - Best 1080p Movies", "Feature-Rich 1080p"): FEATURE_1080P,
         ("Alex_C.T - Best 4K Movies", "Feature-Rich 4K"): FEATURE_4K,
-        ("Alex_C.T - 1080p-2160p Series", "Feature-Rich 1080p-2160p"): ALL_FEATURE_QUALITIES,
         ("Alex_C.T - Best Available Series", "Feature-Rich 1080p-2160p"): ALL_FEATURE_QUALITIES,
         ("Alex_C.T - Best 1080p Series", "Feature-Rich 1080p"): FEATURE_1080P,
         ("Alex_C.T - Best 4K Series", "Feature-Rich 4K"): FEATURE_4K,
-        ("Alex_C.T - 4K Series", "Feature-Rich 4K"): FEATURE_4K,
     }
     for (profile, group), expected in expected_groups.items():
         actual = {
@@ -297,16 +293,11 @@ if not errors:
         }
 
     movie_scores = score_map("Alex_C.T - Best Available Movies")
-    series_scores = score_map("Alex_C.T - 1080p-2160p Series")
+    series_scores = score_map("Alex_C.T - Best Available Series")
     for sibling in ["Alex_C.T - Best 1080p Movies", "Alex_C.T - Best 4K Movies"]:
         if score_map(sibling) != movie_scores:
             fail(f"{sibling} does not inherit the canonical movie score matrix")
-    for sibling in [
-        "Alex_C.T - Best Available Series",
-        "Alex_C.T - Best 1080p Series",
-        "Alex_C.T - Best 4K Series",
-        "Alex_C.T - 4K Series",
-    ]:
+    for sibling in ["Alex_C.T - Best 1080p Series", "Alex_C.T - Best 4K Series"]:
         if score_map(sibling) != series_scores:
             fail(f"{sibling} does not inherit the canonical series score matrix")
 
@@ -320,7 +311,7 @@ if not errors:
 
     for profile, scores in [
         ("Alex_C.T - Best Available Movies", movie_scores),
-        ("Alex_C.T - 1080p-2160p Series", series_scores),
+        ("Alex_C.T - Best Available Series", series_scores),
     ]:
         if scores.get("HDR: Dolby Vision + HDR Bonus", 0) <= scores.get("Video: 2160p Resolution Bonus", 0):
             fail(f"{profile} should value Dolby Vision with HDR above resolution alone")
@@ -391,4 +382,4 @@ if errors:
         print(f" - {error}")
     sys.exit(1)
 
-print("Centralized feature-rich PCD checks passed (12 modules, 10 profiles).")
+print("Centralized feature-rich PCD checks passed (12 modules, 8 profiles).")

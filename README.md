@@ -40,7 +40,7 @@ tuning does not require chasing definitions across multiple files.
 - `06`: Remux, BluRay, WEB-DL, weaker source detectors, and release fixes.
 - `07`: IMAX, cuts, restorations, labels, and other movie editions.
 - `08`: the four Radarr movie profiles and their shared score matrix.
-- `09`: four primary Sonarr profiles, two mapping aliases, and one shared score matrix.
+- `09`: the four Sonarr series profiles and their shared score matrix.
 - `10`: naming, media settings, and runtime-aware quality definitions.
 - `11`: the shared Usenet-first delay profile.
 - `12`: optional movie size bands and series tiny-release helpers.
@@ -58,19 +58,14 @@ tuning does not require chasing definitions across multiple files.
 
 ## Series profiles
 
-- `Alex_C.T - 1080p-2160p Series`: default cross-resolution feature group.
+- `Alex_C.T - Best Available Series`: default cross-resolution feature group.
 - `Alex_C.T - Best 1080p Series`: strict 1080p feature group.
 - `Alex_C.T - Best 4K Series`: strict 2160p feature group.
 - `Alex_C.T - Catalog 480p-1080p Series`: relaxed archive/catalog ladder.
 
-Two compatibility aliases keep mappings from both naming generations valid:
-
-- `Alex_C.T - Best Available Series`: alias of the default cross-resolution profile.
-- `Alex_C.T - 4K Series`: alias of `Alex_C.T - Best 4K Series`.
-
-The aliases clone the canonical series score matrix rather than maintaining
-separate scoring blocks. Database mappings can therefore use either name while
-all feature-score tuning remains centralized.
+Only these eight movie and series profiles are created. Legacy profile names
+are intentionally not retained as aliases; this is a clean profile model, not
+a compatibility layer.
 
 ## Selection philosophy
 
@@ -125,10 +120,11 @@ ops/07.Custom-Formats-Source-Editions-Releases.sql
 ops/12.Series-Size-Guards.sql
 ```
 
-For a clean Profilarr migration:
+Version 3.0 requires a clean Profilarr migration because an existing database
+can retain mappings to profile names that no longer exist:
 
 1. Push this complete layout to GitHub.
-2. Unlink or remove the old `Alex_C.T` database in Profilarr.
+2. Unlink or remove the old `Alex_C.T` database (including database `12`) in Profilarr.
 3. Link the repository again and rebuild it from GitHub.
 4. Sync the desired profiles and settings to Radarr and Sonarr.
 5. Assign `Best Available` as the default and use the targeted or Catalog
