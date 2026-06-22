@@ -1,4 +1,4 @@
-# Alejandro Feature-Rich Profilarr PCD
+# Alejandro Profilarr PCD
 
 A centralized Profilarr database for Radarr and Sonarr. It favors technically
 rich encoded releases with strong HDR/Dolby Vision, surround or lossless audio,
@@ -46,17 +46,15 @@ tuning does not require chasing definitions across multiple files.
 
 ## Movie profiles
 
-- `Alex_C.T - Best 1080p Movies`: default. Compares 1080p BluRay and WEB-DL
-  inside one feature-first quality group.
-- `Alex_C.T - Best 4K Movies`: compares 2160p BluRay and WEB-DL inside the same
-  feature-first decision model.
+- `Alex_C.T - Best 1080p Movies`: default BluRay + WEB-DL 1080p group.
+- `Alex_C.T - Best 4K Movies`: BluRay + WEB-DL 4K group.
 - `Alex_C.T - Catalog 480p-1080p Movies`: relaxed DVD-through-1080p ladder for
   old or scarce titles.
 
 ## Series profiles
 
-- `Alex_C.T - Best 1080p Series`: default 1080p BluRay/WEB-DL feature group.
-- `Alex_C.T - Best 4K Series`: strict 2160p BluRay/WEB-DL feature group.
+- `Alex_C.T - Best 1080p Series`: default BluRay + WEB-DL 1080p group.
+- `Alex_C.T - Best 4K Series`: BluRay + WEB-DL 4K group.
 - `Alex_C.T - Catalog 480p-1080p Series`: relaxed archive/catalog ladder.
 
 Only these six movie and series profiles are created. No compatibility aliases
@@ -78,7 +76,7 @@ Scoring priorities are:
 4. Language, subtitles, codecs, release fixes, and movie editions as refiners.
 
 The primary profiles use a minimum custom-format score of `0`. A usable release
-can download first and continue upgrading toward a feature-rich keeper score of
+can download first and continue upgrading toward a keeper score of
 `10000`. Codec labels receive modest scores because HEVC or AV1 alone does not
 prove that an encode is good.
 

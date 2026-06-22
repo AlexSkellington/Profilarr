@@ -61,8 +61,8 @@ SERIES_PROFILES = {
 }
 EXPECTED_PROFILES = MOVIE_PROFILES | SERIES_PROFILES
 
-FEATURE_1080P = {"Bluray-1080p", "WEBDL-1080p"}
-FEATURE_4K = {"Bluray-2160p", "WEBDL-2160p"}
+STRICT_1080P_QUALITIES = {"Bluray-1080p", "WEBDL-1080p"}
+STRICT_4K_QUALITIES = {"Bluray-2160p", "WEBDL-2160p"}
 
 errors = []
 
@@ -97,8 +97,8 @@ for key in ["name", "version", "description", "arr_types", "dependencies", "prof
     if key not in data:
         fail(f"pcd.json missing required key: {key}")
 
-if data.get("version") != "4.0.0":
-    fail("pcd.json version should be 4.0.0 for the clean six-profile rebuild")
+if data.get("version") != "4.0.1":
+    fail("pcd.json version should be 4.0.1 for the explicit BluRay + WEB-DL group labels")
 if sorted(data.get("arr_types", [])) != ["radarr", "sonarr"]:
     fail("pcd.json arr_types should be exactly ['radarr', 'sonarr']")
 if data.get("profilarr", {}).get("minimum_version") != "2.0.0":
@@ -273,10 +273,10 @@ if not errors:
             fail(f"{profile} should use minimum score 0 and keeper score 10000")
 
     expected_groups = {
-        ("Alex_C.T - Best 1080p Movies", "Feature-Rich 1080p"): FEATURE_1080P,
-        ("Alex_C.T - Best 4K Movies", "Feature-Rich 4K"): FEATURE_4K,
-        ("Alex_C.T - Best 1080p Series", "Feature-Rich 1080p"): FEATURE_1080P,
-        ("Alex_C.T - Best 4K Series", "Feature-Rich 4K"): FEATURE_4K,
+        ("Alex_C.T - Best 1080p Movies", "BluRay + WEB-DL 1080p"): STRICT_1080P_QUALITIES,
+        ("Alex_C.T - Best 4K Movies", "BluRay + WEB-DL 4K"): STRICT_4K_QUALITIES,
+        ("Alex_C.T - Best 1080p Series", "BluRay + WEB-DL 1080p"): STRICT_1080P_QUALITIES,
+        ("Alex_C.T - Best 4K Series", "BluRay + WEB-DL 4K"): STRICT_4K_QUALITIES,
     }
     for (profile, group), expected in expected_groups.items():
         actual = {
@@ -311,7 +311,7 @@ if not errors:
     ]:
         catalog_scores = score_map(catalog)
         if any(catalog_scores.get(name) != score for name, score in canonical.items()):
-            fail(f"{catalog} does not preserve the canonical feature score matrix")
+            fail(f"{catalog} does not preserve the canonical score matrix")
 
     for profile, scores in [
         ("Alex_C.T - Best 1080p Movies", movie_scores),
@@ -400,4 +400,4 @@ if errors:
         print(f" - {error}")
     sys.exit(1)
 
-print("Centralized feature-rich PCD checks passed (12 modules, 6 profiles).")
+print("Centralized PCD checks passed (12 modules, 6 profiles).")
