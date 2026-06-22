@@ -63,11 +63,9 @@ SERIES_PROFILES = {
 }
 EXPECTED_PROFILES = MOVIE_PROFILES | SERIES_PROFILES
 
-ALL_FEATURE_QUALITIES = {
-    "Remux-2160p",
+CROSS_RES_FEATURE_QUALITIES = {
     "Bluray-2160p",
     "WEBDL-2160p",
-    "Remux-1080p",
     "Bluray-1080p",
     "WEBDL-1080p",
 }
@@ -107,8 +105,8 @@ for key in ["name", "version", "description", "arr_types", "dependencies", "prof
     if key not in data:
         fail(f"pcd.json missing required key: {key}")
 
-if data.get("version") != "3.0.0":
-    fail("pcd.json version should be 3.0.0 for the clean eight-profile rebuild")
+if data.get("version") != "3.0.1":
+    fail("pcd.json version should be 3.0.1 for resolution-specific Remux handling")
 if sorted(data.get("arr_types", [])) != ["radarr", "sonarr"]:
     fail("pcd.json arr_types should be exactly ['radarr', 'sonarr']")
 if data.get("profilarr", {}).get("minimum_version") != "2.0.0":
@@ -265,10 +263,10 @@ if not errors:
             fail(f"{profile} should use minimum score 0 and keeper score 10000")
 
     expected_groups = {
-        ("Alex_C.T - Best Available Movies", "Feature-Rich 1080p-2160p"): ALL_FEATURE_QUALITIES,
+        ("Alex_C.T - Best Available Movies", "Feature-Rich 1080p-2160p"): CROSS_RES_FEATURE_QUALITIES,
         ("Alex_C.T - Best 1080p Movies", "Feature-Rich 1080p"): FEATURE_1080P,
         ("Alex_C.T - Best 4K Movies", "Feature-Rich 4K"): FEATURE_4K,
-        ("Alex_C.T - Best Available Series", "Feature-Rich 1080p-2160p"): ALL_FEATURE_QUALITIES,
+        ("Alex_C.T - Best Available Series", "Feature-Rich 1080p-2160p"): CROSS_RES_FEATURE_QUALITIES,
         ("Alex_C.T - Best 1080p Series", "Feature-Rich 1080p"): FEATURE_1080P,
         ("Alex_C.T - Best 4K Series", "Feature-Rich 4K"): FEATURE_4K,
     }
@@ -295,11 +293,15 @@ if not errors:
     movie_scores = score_map("Alex_C.T - Best Available Movies")
     series_scores = score_map("Alex_C.T - Best Available Series")
     for sibling in ["Alex_C.T - Best 1080p Movies", "Alex_C.T - Best 4K Movies"]:
-        if score_map(sibling) != movie_scores:
-            fail(f"{sibling} does not inherit the canonical movie score matrix")
+        expected = dict(movie_scores)
+        expected["Source: Remux Preferred"] = 1800
+        if score_map(sibling) != expected:
+            fail(f"{sibling} should inherit the movie matrix plus the Remux preference")
     for sibling in ["Alex_C.T - Best 1080p Series", "Alex_C.T - Best 4K Series"]:
-        if score_map(sibling) != series_scores:
-            fail(f"{sibling} does not inherit the canonical series score matrix")
+        expected = dict(series_scores)
+        expected["Source: Remux Preferred"] = 1800
+        if score_map(sibling) != expected:
+            fail(f"{sibling} should inherit the series matrix plus the Remux preference")
 
     for catalog, canonical in [
         ("Alex_C.T - Catalog 480p-1080p Movies", movie_scores),
@@ -319,6 +321,23 @@ if not errors:
             fail(f"{profile} should value Atmos above a codec label")
         if scores.get("Audio: 7.1 Bonus", 0) <= scores.get("Audio: 5.1 Surround Preferred", 0):
             fail(f"{profile} should prefer 7.1 while retaining strong 5.1 credit")
+
+    for profile in [
+        "Alex_C.T - Best Available Movies",
+        "Alex_C.T - Catalog 480p-1080p Movies",
+        "Alex_C.T - Best Available Series",
+        "Alex_C.T - Catalog 480p-1080p Series",
+    ]:
+        if "Source: Remux Preferred" in score_map(profile):
+            fail(f"{profile} must not carry the resolution-specific Remux preference")
+
+    for profile in [
+        "Alex_C.T - Best 1080p Movies",
+        "Alex_C.T - Best 4K Movies",
+        "Alex_C.T - Best 1080p Series",
+        "Alex_C.T - Best 4K Series",
+    ]:
+        scores = score_map(profile)
         if scores.get("Source: Remux Preferred", 0) <= scores.get("Video: 2160p Resolution Bonus", 0):
             fail(f"{profile} should treat Remux as a stronger bitrate/source signal than resolution alone")
 

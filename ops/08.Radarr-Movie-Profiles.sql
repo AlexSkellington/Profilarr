@@ -55,14 +55,12 @@ DELETE FROM quality_profiles WHERE name IN (
 -- Profile quality groups
 -------------------------------------------------------------------------------
 
-INSERT INTO quality_profiles (name, description, upgrades_allowed, minimum_custom_format_score, upgrade_until_score, upgrade_score_increment) VALUES ('Alex_C.T - Best Available Movies', 'Default feature-first movie profile. It compares Remux, BluRay, and WEB-DL releases across 1080p and 2160p in one quality group, allowing HDR, Dolby Vision, audio, source, language, and edition richness to outweigh resolution alone.', 1, 0, 10000, 50);
+INSERT INTO quality_profiles (name, description, upgrades_allowed, minimum_custom_format_score, upgrade_until_score, upgrade_score_increment) VALUES ('Alex_C.T - Best Available Movies', 'Default feature-first movie profile. It compares BluRay and WEB-DL releases across 1080p and 2160p in one quality group, allowing HDR, Dolby Vision, audio, source, language, and edition richness to outweigh resolution alone. Remux is reserved for the resolution-specific profiles.', 1, 0, 10000, 50);
 INSERT INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Best Available Movies', 'Radarr');
 INSERT INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Best Available Movies', 'Movies');
 INSERT INTO quality_groups (quality_profile_name, name) VALUES ('Alex_C.T - Best Available Movies', 'Feature-Rich 1080p-2160p');
-INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - Best Available Movies', 'Feature-Rich 1080p-2160p', 'Remux-2160p');
 INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - Best Available Movies', 'Feature-Rich 1080p-2160p', 'Bluray-2160p');
 INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - Best Available Movies', 'Feature-Rich 1080p-2160p', 'WEBDL-2160p');
-INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - Best Available Movies', 'Feature-Rich 1080p-2160p', 'Remux-1080p');
 INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - Best Available Movies', 'Feature-Rich 1080p-2160p', 'Bluray-1080p');
 INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - Best Available Movies', 'Feature-Rich 1080p-2160p', 'WEBDL-1080p');
 INSERT INTO quality_profile_qualities (quality_profile_name, quality_group_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Best Available Movies', 'Feature-Rich 1080p-2160p', 1, 1, 1);
@@ -152,7 +150,6 @@ INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_
 INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Audio: Stereo-2.0 Fallback', 'all', 5);
 
 -- Source and release-fix signals proxy bitrate and provenance without hard size gates.
-INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Source: Remux Preferred', 'all', 1800);
 INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', '4K: UHD BluRay Preferred', 'all', 1200);
 INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', '4K: WEB-DL Preferred', 'all', 600);
 INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', '1080p: UHD BluRay Source Bonus', 'all', 900);
@@ -193,6 +190,10 @@ FROM quality_profile_custom_formats WHERE quality_profile_name = 'Alex_C.T - Bes
 INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score)
 SELECT 'Alex_C.T - Catalog 480p-1080p Movies', custom_format_name, arr_type, score
 FROM quality_profile_custom_formats WHERE quality_profile_name = 'Alex_C.T - Best Available Movies';
+
+-- Remux is intentionally exclusive to resolution-specific profiles.
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best 1080p Movies', 'Source: Remux Preferred', 'all', 1800);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best 4K Movies', 'Source: Remux Preferred', 'all', 1800);
 
 -- Catalog-only lower-resolution source refiners.
 INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', '1080p: WEBRip Source', 'all', 100);
