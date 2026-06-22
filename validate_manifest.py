@@ -105,8 +105,8 @@ for key in ["name", "version", "description", "arr_types", "dependencies", "prof
     if key not in data:
         fail(f"pcd.json missing required key: {key}")
 
-if data.get("version") != "3.0.1":
-    fail("pcd.json version should be 3.0.1 for resolution-specific Remux handling")
+if data.get("version") != "3.0.2":
+    fail("pcd.json version should be 3.0.2 for resolution-neutral defaults")
 if sorted(data.get("arr_types", [])) != ["radarr", "sonarr"]:
     fail("pcd.json arr_types should be exactly ['radarr', 'sonarr']")
 if data.get("profilarr", {}).get("minimum_version") != "2.0.0":
@@ -315,8 +315,14 @@ if not errors:
         ("Alex_C.T - Best Available Movies", movie_scores),
         ("Alex_C.T - Best Available Series", series_scores),
     ]:
-        if scores.get("HDR: Dolby Vision + HDR Bonus", 0) <= scores.get("Video: 2160p Resolution Bonus", 0):
-            fail(f"{profile} should value Dolby Vision with HDR above resolution alone")
+        if "Video: 2160p Resolution Bonus" in scores:
+            fail(f"{profile} must not award points for resolution alone")
+        if "1080p: UHD BluRay Source Bonus" in scores:
+            fail(f"{profile} must not stack a resolution-specific UHD-source bonus")
+        if scores.get("4K: UHD BluRay Preferred") != scores.get("1080p: BluRay Preferred"):
+            fail(f"{profile} should score BluRay sources equally across resolutions")
+        if scores.get("4K: WEB-DL Preferred") != scores.get("1080p: WEB-DL Preferred"):
+            fail(f"{profile} should score WEB-DL sources equally across resolutions")
         if scores.get("Audio: Atmos Bonus", 0) <= scores.get("Codec: HEVC-x265 Preferred", 0):
             fail(f"{profile} should value Atmos above a codec label")
         if scores.get("Audio: 7.1 Bonus", 0) <= scores.get("Audio: 5.1 Surround Preferred", 0):
@@ -338,8 +344,12 @@ if not errors:
         "Alex_C.T - Best 4K Series",
     ]:
         scores = score_map(profile)
-        if scores.get("Source: Remux Preferred", 0) <= scores.get("Video: 2160p Resolution Bonus", 0):
-            fail(f"{profile} should treat Remux as a stronger bitrate/source signal than resolution alone")
+        source_baseline = max(
+            scores.get("4K: UHD BluRay Preferred", 0),
+            scores.get("1080p: BluRay Preferred", 0),
+        )
+        if scores.get("Source: Remux Preferred", 0) <= source_baseline:
+            fail(f"{profile} should treat Remux as stronger than an encoded BluRay source")
 
     negative_scores = list(
         connection.execute("SELECT quality_profile_name, custom_format_name, score FROM quality_profile_custom_formats WHERE score < 0")

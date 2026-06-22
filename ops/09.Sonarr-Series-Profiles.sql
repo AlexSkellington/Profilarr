@@ -4,7 +4,8 @@
 --
 -- The three primary profiles share one technical score matrix. The default
 -- compares 1080p and 2160p directly, while the targeted profiles constrain
--- that same decision model to a specific resolution.
+-- that same decision model to a specific resolution. Resolution itself has
+-- no score, and equivalent sources score equally across resolutions.
 
 -- Remove superseded and current managed series profiles before rebuilding them.
 DELETE FROM quality_profile_custom_formats WHERE quality_profile_name IN (
@@ -48,7 +49,7 @@ DELETE FROM quality_profiles WHERE name IN (
 -- Profile quality groups
 -------------------------------------------------------------------------------
 
-INSERT INTO quality_profiles (name, description, upgrades_allowed, minimum_custom_format_score, upgrade_until_score, upgrade_score_increment) VALUES ('Alex_C.T - Best Available Series', 'Default feature-first series profile. It compares BluRay and WEB-DL releases across 1080p and 2160p in one quality group so HDR, Dolby Vision, audio, source, and language richness can outweigh resolution alone. Remux is reserved for the resolution-specific profiles.', 1, 0, 10000, 100);
+INSERT INTO quality_profiles (name, description, upgrades_allowed, minimum_custom_format_score, upgrade_until_score, upgrade_score_increment) VALUES ('Alex_C.T - Best Available Series', 'Default resolution-neutral, feature-first series profile. It compares BluRay and WEB-DL releases across 1080p and 2160p in one quality group so HDR, Dolby Vision, audio, source, and language richness choose the winner. Remux is reserved for the resolution-specific profiles.', 1, 0, 10000, 100);
 INSERT INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Best Available Series', 'Sonarr');
 INSERT INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Best Available Series', 'Series');
 INSERT INTO quality_groups (quality_profile_name, name) VALUES ('Alex_C.T - Best Available Series', 'Feature-Rich 1080p-2160p');
@@ -116,7 +117,6 @@ INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_
 INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Series', 'Subtitles: Spanish Bonus', 'all', 60);
 INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Series', 'Subtitles: English Bonus', 'all', 40);
 
-INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Series', 'Video: 2160p Resolution Bonus', 'all', 1000);
 INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Series', 'Codec: HEVC-x265 Preferred', 'all', 400);
 INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Series', 'Codec: AV1 Preferred', 'all', 350);
 INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Series', 'Codec: VVC-x266 Future', 'all', 200);
@@ -139,9 +139,8 @@ INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_
 INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Series', 'Audio: AAC Fallback Marker', 'all', 20);
 INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Series', 'Audio: Stereo-2.0 Fallback', 'all', 5);
 
-INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Series', '4K: UHD BluRay Preferred', 'all', 1200);
-INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Series', '4K: WEB-DL Preferred', 'all', 600);
-INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Series', '1080p: UHD BluRay Source Bonus', 'all', 900);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Series', '4K: UHD BluRay Preferred', 'all', 1000);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Series', '4K: WEB-DL Preferred', 'all', 500);
 INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Series', '1080p: BluRay Preferred', 'all', 1000);
 INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Series', '1080p: WEB-DL Preferred', 'all', 500);
 INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Series', 'Release: Proper-Repack-Rerip', 'all', 75);

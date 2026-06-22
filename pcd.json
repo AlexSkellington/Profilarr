@@ -1,7 +1,7 @@
 {
   "name": "Alex_C.T",
-  "version": "3.0.1",
-  "description": "Alejandro's clean eight-profile media-server database for Radarr and Sonarr, with feature-first default, 1080p, 4K, and Catalog profiles plus concern-focused language, codec, video, audio, source, edition, and optional size modules.",
+  "version": "3.0.2",
+  "description": "Alejandro's clean eight-profile media-server database for Radarr and Sonarr, with resolution-neutral feature-first defaults, targeted 1080p and 4K profiles, Catalog profiles, and concern-focused language, codec, video, audio, source, edition, and optional size modules.",
   "arr_types": [
     "radarr",
     "sonarr"
