@@ -1,5 +1,5 @@
 ﻿-- Alex_C.T Media Server modular Profilarr v2 PCD operations.
--- 09: Usenet-first delay profile.
+-- 11: Usenet-first delay profile.
 -- Requires no previous ops files, but import after the core/profile ops for readability.
 
 -- Profilarr's delay_profiles entity is shared and can be synced to Radarr/Sonarr instances.

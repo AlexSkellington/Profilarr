@@ -1,493 +1,211 @@
-﻿-- Alex_C.T Media Server modular Profilarr v2 PCD operations.
--- 08: Radarr movie quality profiles and custom-format scoring.
+-- Alex_C.T modular Profilarr v2 PCD operations.
+-- 08: Radarr movie quality profiles and feature-rich scoring.
 -- Requires 01 through 07.
 --
--- Movie scoring philosophy:
--- - No negative movie scores.
--- - Compact, Premium, and Remux all stay additive so richer releases still win
---   by stacking more real features.
--- - Quality Definitions in 10.Media-Management.sql remain the MB/min rails.
--- - Movie size-band helpers act as total-size eligibility gates for each lane.
--- - Remux profiles are soft remux-first profiles with premium encode fallback.
+-- Comparable 1080p and 2160p qualities are grouped so custom-format score,
+-- not resolution label alone, chooses the best release. The 2160p bonus is
+-- deliberately modest: equally rich 4K wins, but excellent 1080p can beat
+-- weak 4K. Size helpers in 12 are optional and are not attached here.
+
+-- Remove superseded and current managed movie profiles before rebuilding them.
+DELETE FROM quality_profile_custom_formats WHERE quality_profile_name IN (
+  'Alex_C.T - Compact 1080p Movies', 'Alex_C.T - Premium 1080p Movies', 'Alex_C.T - Remux 1080p Movies',
+  'Alex_C.T - Compact 4K Movies', 'Alex_C.T - Premium 4K Movies', 'Alex_C.T - Remux 4K Movies',
+  'Alex_C.T - 1080p Plex Movies', 'Alex_C.T - 4K Plex Movies', 'Alex_C.T - Catalog 480p-1080p Plex Movies',
+  'Alex_C.T - Best Available Movies', 'Alex_C.T - Best 1080p Movies', 'Alex_C.T - Best 4K Movies',
+  'Alex_C.T - Catalog 480p-1080p Movies'
+);
+DELETE FROM quality_group_members WHERE quality_profile_name IN (
+  'Alex_C.T - Compact 1080p Movies', 'Alex_C.T - Premium 1080p Movies', 'Alex_C.T - Remux 1080p Movies',
+  'Alex_C.T - Compact 4K Movies', 'Alex_C.T - Premium 4K Movies', 'Alex_C.T - Remux 4K Movies',
+  'Alex_C.T - 1080p Plex Movies', 'Alex_C.T - 4K Plex Movies', 'Alex_C.T - Catalog 480p-1080p Plex Movies',
+  'Alex_C.T - Best Available Movies', 'Alex_C.T - Best 1080p Movies', 'Alex_C.T - Best 4K Movies',
+  'Alex_C.T - Catalog 480p-1080p Movies'
+);
+DELETE FROM quality_profile_qualities WHERE quality_profile_name IN (
+  'Alex_C.T - Compact 1080p Movies', 'Alex_C.T - Premium 1080p Movies', 'Alex_C.T - Remux 1080p Movies',
+  'Alex_C.T - Compact 4K Movies', 'Alex_C.T - Premium 4K Movies', 'Alex_C.T - Remux 4K Movies',
+  'Alex_C.T - 1080p Plex Movies', 'Alex_C.T - 4K Plex Movies', 'Alex_C.T - Catalog 480p-1080p Plex Movies',
+  'Alex_C.T - Best Available Movies', 'Alex_C.T - Best 1080p Movies', 'Alex_C.T - Best 4K Movies',
+  'Alex_C.T - Catalog 480p-1080p Movies'
+);
+DELETE FROM quality_groups WHERE quality_profile_name IN (
+  'Alex_C.T - Compact 1080p Movies', 'Alex_C.T - Premium 1080p Movies', 'Alex_C.T - Remux 1080p Movies',
+  'Alex_C.T - Compact 4K Movies', 'Alex_C.T - Premium 4K Movies', 'Alex_C.T - Remux 4K Movies',
+  'Alex_C.T - 1080p Plex Movies', 'Alex_C.T - 4K Plex Movies', 'Alex_C.T - Catalog 480p-1080p Plex Movies',
+  'Alex_C.T - Best Available Movies', 'Alex_C.T - Best 1080p Movies', 'Alex_C.T - Best 4K Movies',
+  'Alex_C.T - Catalog 480p-1080p Movies'
+);
+DELETE FROM quality_profile_tags WHERE quality_profile_name IN (
+  'Alex_C.T - Compact 1080p Movies', 'Alex_C.T - Premium 1080p Movies', 'Alex_C.T - Remux 1080p Movies',
+  'Alex_C.T - Compact 4K Movies', 'Alex_C.T - Premium 4K Movies', 'Alex_C.T - Remux 4K Movies',
+  'Alex_C.T - 1080p Plex Movies', 'Alex_C.T - 4K Plex Movies', 'Alex_C.T - Catalog 480p-1080p Plex Movies',
+  'Alex_C.T - Best Available Movies', 'Alex_C.T - Best 1080p Movies', 'Alex_C.T - Best 4K Movies',
+  'Alex_C.T - Catalog 480p-1080p Movies'
+);
+DELETE FROM quality_profiles WHERE name IN (
+  'Alex_C.T - Compact 1080p Movies', 'Alex_C.T - Premium 1080p Movies', 'Alex_C.T - Remux 1080p Movies',
+  'Alex_C.T - Compact 4K Movies', 'Alex_C.T - Premium 4K Movies', 'Alex_C.T - Remux 4K Movies',
+  'Alex_C.T - 1080p Plex Movies', 'Alex_C.T - 4K Plex Movies', 'Alex_C.T - Catalog 480p-1080p Plex Movies',
+  'Alex_C.T - Best Available Movies', 'Alex_C.T - Best 1080p Movies', 'Alex_C.T - Best 4K Movies',
+  'Alex_C.T - Catalog 480p-1080p Movies'
+);
 
 -------------------------------------------------------------------------------
--- Compact 1080p movies
+-- Profile quality groups
 -------------------------------------------------------------------------------
 
-INSERT OR REPLACE INTO quality_profiles (name, description, upgrades_allowed, minimum_custom_format_score, upgrade_until_score, upgrade_score_increment) VALUES ('Alex_C.T - Compact 1080p Movies', 'Compact 1080p movie profile. Keeps the current space-conscious 1080p lane, but still uses fully additive scoring so richer BluRay and WEB-DL encodes rise naturally. A mandatory movie-size helper keeps this profile inside the intended compact total-size band while quality definitions remain the main MB/min guardrails.', 1, 10000, 22000, 50);
-INSERT OR REPLACE INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Compact 1080p Movies', 'Radarr');
-INSERT OR REPLACE INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Compact 1080p Movies', 'Movies');
-INSERT OR REPLACE INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Compact 1080p Movies', '1080p');
-INSERT OR REPLACE INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Compact 1080p Movies', 'Compact');
-INSERT OR REPLACE INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Compact 1080p Movies', 'Bluray-1080p', 1, 1, 1);
-INSERT OR REPLACE INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Compact 1080p Movies', 'WEBDL-1080p', 2, 1, 0);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'Size Band: 1080p Compact Eligible', 'all', 10000);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'Language: Prefer English + Spanish', 'all', 375);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'Language: Spanish Audio Marker', 'all', 250);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'Language: English Marker', 'all', 25);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'Language: English-Only Backup', 'all', 25);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'Language: Multi-Dual Audio Bonus', 'all', 50);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'Subtitles: Prefer English + Spanish', 'all', 60);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'Subtitles: Spanish Bonus', 'all', 40);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'Subtitles: English Bonus', 'all', 25);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'Codec: HEVC-x265 Preferred', 'all', 1700);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'Codec: AV1 Preferred', 'all', 1500);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'Codec: VVC-x266 Future', 'all', 1000);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'Video: 10-bit SDR / Main 10 Fallback', 'all', 250);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'HDR: Base HDR Bonus', 'all', 300);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'HDR: HDR10 Bonus', 'all', 250);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'HDR: HDR10+ Bonus', 'all', 400);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'HDR: Dolby Vision Bonus', 'all', 250);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'HDR: Dolby Vision + HDR Bonus', 'all', 350);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'HDR: Dolby Vision Only Fallback', 'all', 150);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'Audio: Surround Bonus', 'all', 550);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'Audio: 5.1 Surround Preferred', 'all', 350);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'Audio: 6.1 Bonus', 'all', 180);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'Audio: 7.1 Bonus', 'all', 150);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'Audio: Atmos Bonus', 'all', 850);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'Audio: EAC3-AC3 Preferred', 'all', 220);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'Audio: AAC Fallback Marker', 'all', 60);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'Audio: Stereo-2.0 Fallback', 'all', 20);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'Edition: IMAX', 'all', 1700);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'Edition: IMAX Enhanced', 'all', 1600);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'Edition: Director''s Cut', 'all', 800);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'Edition: Final Cut', 'all', 800);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'Edition: Extended', 'all', 600);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'Edition: Ultimate Cut', 'all', 600);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'Edition: Special Edition', 'all', 450);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'Edition: Expanded Ratio', 'all', 350);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'Edition: Open Matte', 'all', 350);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'Edition: VAR', 'all', 350);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'Edition: Remastered', 'all', 300);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'Edition: Restored', 'all', 300);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'Edition: 4K Scan', 'all', 300);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'Edition: New Transfer', 'all', 300);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'Edition: Criterion', 'all', 300);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'Edition: Arrow', 'all', 250);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'Edition: Shout Factory', 'all', 250);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'Edition: StudioCanal', 'all', 250);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'Edition: Collector''s Edition', 'all', 180);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'Edition: Anniversary Edition', 'all', 180);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'Edition: Unrated', 'all', 180);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', 'Release: Proper-Repack-Rerip', 'all', 30);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', '1080p: UHD BluRay Source Bonus', 'all', 700);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', '1080p: BluRay Preferred', 'all', 1400);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 1080p Movies', '1080p: WEB-DL Preferred', 'all', 900);
+INSERT INTO quality_profiles (name, description, upgrades_allowed, minimum_custom_format_score, upgrade_until_score, upgrade_score_increment) VALUES ('Alex_C.T - Best Available Movies', 'Default feature-first movie profile. It compares Remux, BluRay, and WEB-DL releases across 1080p and 2160p in one quality group, allowing HDR, Dolby Vision, audio, source, language, and edition richness to outweigh resolution alone.', 1, 0, 10000, 50);
+INSERT INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Best Available Movies', 'Radarr');
+INSERT INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Best Available Movies', 'Movies');
+INSERT INTO quality_groups (quality_profile_name, name) VALUES ('Alex_C.T - Best Available Movies', 'Feature-Rich 1080p-2160p');
+INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - Best Available Movies', 'Feature-Rich 1080p-2160p', 'Remux-2160p');
+INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - Best Available Movies', 'Feature-Rich 1080p-2160p', 'Bluray-2160p');
+INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - Best Available Movies', 'Feature-Rich 1080p-2160p', 'WEBDL-2160p');
+INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - Best Available Movies', 'Feature-Rich 1080p-2160p', 'Remux-1080p');
+INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - Best Available Movies', 'Feature-Rich 1080p-2160p', 'Bluray-1080p');
+INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - Best Available Movies', 'Feature-Rich 1080p-2160p', 'WEBDL-1080p');
+INSERT INTO quality_profile_qualities (quality_profile_name, quality_group_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Best Available Movies', 'Feature-Rich 1080p-2160p', 1, 1, 1);
+
+INSERT INTO quality_profiles (name, description, upgrades_allowed, minimum_custom_format_score, upgrade_until_score, upgrade_score_increment) VALUES ('Alex_C.T - Best 1080p Movies', 'Resolution-specific feature-first movie profile. It compares 1080p Remux, BluRay, and WEB-DL releases by technical richness and keeps every accepted release at 1080p.', 1, 0, 10000, 50);
+INSERT INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Best 1080p Movies', 'Radarr');
+INSERT INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Best 1080p Movies', 'Movies');
+INSERT INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Best 1080p Movies', '1080p');
+INSERT INTO quality_groups (quality_profile_name, name) VALUES ('Alex_C.T - Best 1080p Movies', 'Feature-Rich 1080p');
+INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - Best 1080p Movies', 'Feature-Rich 1080p', 'Remux-1080p');
+INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - Best 1080p Movies', 'Feature-Rich 1080p', 'Bluray-1080p');
+INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - Best 1080p Movies', 'Feature-Rich 1080p', 'WEBDL-1080p');
+INSERT INTO quality_profile_qualities (quality_profile_name, quality_group_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Best 1080p Movies', 'Feature-Rich 1080p', 1, 1, 1);
+
+INSERT INTO quality_profiles (name, description, upgrades_allowed, minimum_custom_format_score, upgrade_until_score, upgrade_score_increment) VALUES ('Alex_C.T - Best 4K Movies', 'Resolution-specific feature-first movie profile. It compares 2160p Remux, BluRay, and WEB-DL releases by technical richness and keeps every accepted release at 4K.', 1, 0, 10000, 50);
+INSERT INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Best 4K Movies', 'Radarr');
+INSERT INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Best 4K Movies', 'Movies');
+INSERT INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Best 4K Movies', '4K');
+INSERT INTO quality_groups (quality_profile_name, name) VALUES ('Alex_C.T - Best 4K Movies', 'Feature-Rich 4K');
+INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - Best 4K Movies', 'Feature-Rich 4K', 'Remux-2160p');
+INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - Best 4K Movies', 'Feature-Rich 4K', 'Bluray-2160p');
+INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - Best 4K Movies', 'Feature-Rich 4K', 'WEBDL-2160p');
+INSERT INTO quality_profile_qualities (quality_profile_name, quality_group_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Best 4K Movies', 'Feature-Rich 4K', 1, 1, 1);
+
+INSERT INTO quality_profiles (name, description, upgrades_allowed, minimum_custom_format_score, upgrade_until_score, upgrade_score_increment) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Relaxed movie profile for older and scarce titles. It accepts DVD through 1080p, climbs by resolution and source quality, and uses the same feature-rich scoring priorities as the primary movie profiles.', 1, 0, 10000, 50);
+INSERT INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Radarr');
+INSERT INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Movies');
+INSERT INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Catalog');
+INSERT INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Bluray-1080p', 1, 1, 1);
+INSERT INTO quality_groups (quality_profile_name, name) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'WEB 1080p');
+INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'WEB 1080p', 'WEBDL-1080p');
+INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'WEB 1080p', 'WEBRip-1080p');
+INSERT INTO quality_profile_qualities (quality_profile_name, quality_group_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'WEB 1080p', 2, 1, 0);
+INSERT INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Bluray-720p', 3, 1, 0);
+INSERT INTO quality_groups (quality_profile_name, name) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'WEB 720p');
+INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'WEB 720p', 'WEBDL-720p');
+INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'WEB 720p', 'WEBRip-720p');
+INSERT INTO quality_profile_qualities (quality_profile_name, quality_group_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'WEB 720p', 4, 1, 0);
+INSERT INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Bluray-576p', 5, 1, 0);
+INSERT INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Bluray-480p', 6, 1, 0);
+INSERT INTO quality_groups (quality_profile_name, name) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'WEB 480p');
+INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'WEB 480p', 'WEBDL-480p');
+INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'WEB 480p', 'WEBRip-480p');
+INSERT INTO quality_profile_qualities (quality_profile_name, quality_group_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'WEB 480p', 7, 1, 0);
+INSERT INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'DVD', 8, 1, 0);
 
 -------------------------------------------------------------------------------
--- Premium 1080p movies
+-- Shared movie scoring: technical features dominate resolution and editions.
 -------------------------------------------------------------------------------
 
-INSERT OR REPLACE INTO quality_profiles (name, description, upgrades_allowed, minimum_custom_format_score, upgrade_until_score, upgrade_score_increment) VALUES ('Alex_C.T - Premium 1080p Movies', 'Premium 1080p movie profile for high-bitrate encodes that stay much closer to remux territory. It keeps additive scoring, but boosts source, codec, HDR, Atmos, and lossless-audio credit so richer near-remux encodes clearly rise above ordinary compact releases.', 1, 10000, 26000, 50);
-INSERT OR REPLACE INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Premium 1080p Movies', 'Radarr');
-INSERT OR REPLACE INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Premium 1080p Movies', 'Movies');
-INSERT OR REPLACE INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Premium 1080p Movies', '1080p');
-INSERT OR REPLACE INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Premium 1080p Movies', 'Premium');
-INSERT OR REPLACE INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Premium 1080p Movies', 'Bluray-1080p', 1, 1, 1);
-INSERT OR REPLACE INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Premium 1080p Movies', 'WEBDL-1080p', 2, 1, 0);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'Size Band: 1080p Premium Eligible', 'all', 10000);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'Language: Prefer English + Spanish', 'all', 375);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'Language: Spanish Audio Marker', 'all', 250);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'Language: English Marker', 'all', 25);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'Language: English-Only Backup', 'all', 25);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'Language: Multi-Dual Audio Bonus', 'all', 50);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'Subtitles: Prefer English + Spanish', 'all', 60);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'Subtitles: Spanish Bonus', 'all', 40);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'Subtitles: English Bonus', 'all', 25);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'Codec: HEVC-x265 Preferred', 'all', 2400);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'Codec: AV1 Preferred', 'all', 2000);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'Codec: VVC-x266 Future', 'all', 1500);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'Video: 10-bit SDR / Main 10 Fallback', 'all', 500);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'HDR: Base HDR Bonus', 'all', 450);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'HDR: HDR10 Bonus', 'all', 400);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'HDR: HDR10+ Bonus', 'all', 700);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'HDR: Dolby Vision Bonus', 'all', 450);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'HDR: Dolby Vision + HDR Bonus', 'all', 850);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'HDR: Dolby Vision Only Fallback', 'all', 250);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'Audio: Surround Bonus', 'all', 650);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'Audio: 5.1 Surround Preferred', 'all', 375);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'Audio: 6.1 Bonus', 'all', 200);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'Audio: 7.1 Bonus', 'all', 175);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'Audio: Atmos Bonus', 'all', 1100);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'Audio: Lossless Track Bonus', 'all', 900);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'Audio: EAC3-AC3 Preferred', 'all', 300);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'Audio: AAC Fallback Marker', 'all', 40);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'Audio: Stereo-2.0 Fallback', 'all', 10);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'Edition: IMAX', 'all', 1700);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'Edition: IMAX Enhanced', 'all', 1600);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'Edition: Director''s Cut', 'all', 800);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'Edition: Final Cut', 'all', 800);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'Edition: Extended', 'all', 600);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'Edition: Ultimate Cut', 'all', 600);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'Edition: Special Edition', 'all', 450);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'Edition: Expanded Ratio', 'all', 350);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'Edition: Open Matte', 'all', 350);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'Edition: VAR', 'all', 350);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'Edition: Remastered', 'all', 300);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'Edition: Restored', 'all', 300);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'Edition: 4K Scan', 'all', 300);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'Edition: New Transfer', 'all', 300);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'Edition: Criterion', 'all', 300);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'Edition: Arrow', 'all', 250);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'Edition: Shout Factory', 'all', 250);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'Edition: StudioCanal', 'all', 250);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'Edition: Collector''s Edition', 'all', 180);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'Edition: Anniversary Edition', 'all', 180);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'Edition: Unrated', 'all', 180);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', 'Release: Proper-Repack-Rerip', 'all', 30);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', '1080p: UHD BluRay Source Bonus', 'all', 1000);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', '1080p: BluRay Preferred', 'all', 1900);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 1080p Movies', '1080p: WEB-DL Preferred', 'all', 1200);
+-- Language and subtitles remain useful refiners without overriding A/V quality.
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Language: Prefer English + Spanish', 'all', 300);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Language: Spanish Audio Marker', 'all', 200);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Language: English Marker', 'all', 25);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Language: English-Only Backup', 'all', 25);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Language: Spanish-Only Fallback', 'all', 150);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Language: Latino Spanish Fallback', 'all', 125);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Language: Multi-Dual Audio Bonus', 'all', 100);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Subtitles: Prefer English + Spanish', 'all', 75);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Subtitles: Spanish Bonus', 'all', 50);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Subtitles: English Bonus', 'all', 25);
 
--------------------------------------------------------------------------------
--- Remux 1080p movies
--------------------------------------------------------------------------------
+-- Resolution and codecs are tie-breakers; codec labels are not proof of encode quality.
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Video: 2160p Resolution Bonus', 'all', 1000);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Codec: HEVC-x265 Preferred', 'all', 400);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Codec: AV1 Preferred', 'all', 350);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Codec: VVC-x266 Future', 'all', 200);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Video: 10-bit SDR / Main 10 Fallback', 'all', 250);
 
-INSERT OR REPLACE INTO quality_profiles (name, description, upgrades_allowed, minimum_custom_format_score, upgrade_until_score, upgrade_score_increment) VALUES ('Alex_C.T - Remux 1080p Movies', 'Soft remux-first 1080p movie profile. It prefers Remux-1080p immediately, but still allows premium 1080p encodes to compete as fallback candidates when a remux is unavailable. The additive score keeps technical richness visible instead of relying on penalties or blockers.', 1, 10000, 32000, 50);
-INSERT OR REPLACE INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Remux 1080p Movies', 'Radarr');
-INSERT OR REPLACE INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Remux 1080p Movies', 'Movies');
-INSERT OR REPLACE INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Remux 1080p Movies', '1080p');
-INSERT OR REPLACE INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Remux 1080p Movies', 'Remux');
-INSERT OR REPLACE INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Remux 1080p Movies', 'Remux-1080p', 1, 1, 1);
-INSERT OR REPLACE INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Remux 1080p Movies', 'Bluray-1080p', 2, 1, 0);
-INSERT OR REPLACE INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Remux 1080p Movies', 'WEBDL-1080p', 3, 1, 0);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'Size Band: 1080p Premium Eligible', 'all', 10000);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'Size Band: 1080p Remux Eligible', 'all', 10000);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'Language: Prefer English + Spanish', 'all', 375);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'Language: Spanish Audio Marker', 'all', 250);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'Language: English Marker', 'all', 25);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'Language: English-Only Backup', 'all', 25);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'Language: Multi-Dual Audio Bonus', 'all', 50);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'Subtitles: Prefer English + Spanish', 'all', 60);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'Subtitles: Spanish Bonus', 'all', 40);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'Subtitles: English Bonus', 'all', 25);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'Codec: HEVC-x265 Preferred', 'all', 2400);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'Codec: AV1 Preferred', 'all', 2000);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'Codec: VVC-x266 Future', 'all', 1500);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'Video: 10-bit SDR / Main 10 Fallback', 'all', 500);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'HDR: Base HDR Bonus', 'all', 450);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'HDR: HDR10 Bonus', 'all', 400);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'HDR: HDR10+ Bonus', 'all', 700);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'HDR: Dolby Vision Bonus', 'all', 450);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'HDR: Dolby Vision + HDR Bonus', 'all', 850);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'HDR: Dolby Vision Only Fallback', 'all', 250);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'Audio: Surround Bonus', 'all', 650);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'Audio: 5.1 Surround Preferred', 'all', 375);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'Audio: 6.1 Bonus', 'all', 200);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'Audio: 7.1 Bonus', 'all', 175);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'Audio: Atmos Bonus', 'all', 1100);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'Audio: Lossless Track Bonus', 'all', 1200);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'Audio: EAC3-AC3 Preferred', 'all', 300);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'Audio: AAC Fallback Marker', 'all', 40);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'Audio: Stereo-2.0 Fallback', 'all', 10);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'Edition: IMAX', 'all', 1700);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'Edition: IMAX Enhanced', 'all', 1600);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'Edition: Director''s Cut', 'all', 800);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'Edition: Final Cut', 'all', 800);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'Edition: Extended', 'all', 600);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'Edition: Ultimate Cut', 'all', 600);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'Edition: Special Edition', 'all', 450);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'Edition: Expanded Ratio', 'all', 350);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'Edition: Open Matte', 'all', 350);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'Edition: VAR', 'all', 350);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'Edition: Remastered', 'all', 300);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'Edition: Restored', 'all', 300);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'Edition: 4K Scan', 'all', 300);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'Edition: New Transfer', 'all', 300);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'Edition: Criterion', 'all', 300);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'Edition: Arrow', 'all', 250);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'Edition: Shout Factory', 'all', 250);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'Edition: StudioCanal', 'all', 250);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'Edition: Collector''s Edition', 'all', 180);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'Edition: Anniversary Edition', 'all', 180);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'Edition: Unrated', 'all', 180);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', 'Release: Proper-Repack-Rerip', 'all', 30);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', '1080p: UHD BluRay Source Bonus', 'all', 1000);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', '1080p: BluRay Preferred', 'all', 1900);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 1080p Movies', '1080p: WEB-DL Preferred', 'all', 1200);
+-- Dynamic range is the strongest video feature family.
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'HDR: Base HDR Bonus', 'all', 800);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'HDR: HDR10 Bonus', 'all', 700);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'HDR: HDR10+ Bonus', 'all', 1200);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'HDR: Dolby Vision Bonus', 'all', 600);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'HDR: Dolby Vision + HDR Bonus', 'all', 1800);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'HDR: Dolby Vision Only Fallback', 'all', 300);
 
--------------------------------------------------------------------------------
--- Compact 4K movies
--------------------------------------------------------------------------------
+-- Audio rewards lossless/object audio and prefers 7.1, while retaining strong 5.1 credit.
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Audio: Surround Bonus', 'all', 500);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Audio: 5.1 Surround Preferred', 'all', 600);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Audio: 6.1 Bonus', 'all', 650);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Audio: 7.1 Bonus', 'all', 800);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Audio: Atmos Bonus', 'all', 1300);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Audio: Lossless Track Bonus', 'all', 1300);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Audio: EAC3-AC3 Preferred', 'all', 300);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Audio: AAC Fallback Marker', 'all', 20);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Audio: Stereo-2.0 Fallback', 'all', 5);
 
-INSERT OR REPLACE INTO quality_profiles (name, description, upgrades_allowed, minimum_custom_format_score, upgrade_until_score, upgrade_score_increment) VALUES ('Alex_C.T - Compact 4K Movies', 'Compact 4K movie profile. Keeps the current space-aware 2160p behavior, but still lets richer HDR, codec, subtitle, language, and audio features stack positively inside a tighter 4K total-size lane.', 1, 10000, 22000, 50);
-INSERT OR REPLACE INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Compact 4K Movies', 'Radarr');
-INSERT OR REPLACE INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Compact 4K Movies', 'Movies');
-INSERT OR REPLACE INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Compact 4K Movies', '4K');
-INSERT OR REPLACE INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Compact 4K Movies', 'Compact');
-INSERT OR REPLACE INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Compact 4K Movies', 'Bluray-2160p', 1, 1, 1);
-INSERT OR REPLACE INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Compact 4K Movies', 'WEBDL-2160p', 2, 1, 0);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'Size Band: 4K Compact Eligible', 'all', 10000);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'Language: Prefer English + Spanish', 'all', 375);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'Language: Spanish Audio Marker', 'all', 250);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'Language: English Marker', 'all', 25);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'Language: English-Only Backup', 'all', 25);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'Language: Multi-Dual Audio Bonus', 'all', 50);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'Subtitles: Prefer English + Spanish', 'all', 60);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'Subtitles: Spanish Bonus', 'all', 40);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'Subtitles: English Bonus', 'all', 25);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'Codec: HEVC-x265 Preferred', 'all', 1700);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'Codec: AV1 Preferred', 'all', 1500);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'Codec: VVC-x266 Future', 'all', 1000);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'Video: 10-bit SDR / Main 10 Fallback', 'all', 250);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'HDR: Base HDR Bonus', 'all', 300);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'HDR: HDR10 Bonus', 'all', 250);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'HDR: HDR10+ Bonus', 'all', 400);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'HDR: Dolby Vision Bonus', 'all', 250);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'HDR: Dolby Vision + HDR Bonus', 'all', 350);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'HDR: Dolby Vision Only Fallback', 'all', 150);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'Audio: Surround Bonus', 'all', 550);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'Audio: 5.1 Surround Preferred', 'all', 350);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'Audio: 6.1 Bonus', 'all', 180);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'Audio: 7.1 Bonus', 'all', 150);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'Audio: Atmos Bonus', 'all', 850);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'Audio: EAC3-AC3 Preferred', 'all', 220);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'Audio: AAC Fallback Marker', 'all', 60);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'Audio: Stereo-2.0 Fallback', 'all', 20);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'Edition: IMAX', 'all', 1700);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'Edition: IMAX Enhanced', 'all', 1600);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'Edition: Director''s Cut', 'all', 800);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'Edition: Final Cut', 'all', 800);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'Edition: Extended', 'all', 600);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'Edition: Ultimate Cut', 'all', 600);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'Edition: Special Edition', 'all', 450);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'Edition: Expanded Ratio', 'all', 350);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'Edition: Open Matte', 'all', 350);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'Edition: VAR', 'all', 350);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'Edition: Remastered', 'all', 300);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'Edition: Restored', 'all', 300);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'Edition: 4K Scan', 'all', 300);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'Edition: New Transfer', 'all', 300);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'Edition: Criterion', 'all', 300);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'Edition: Arrow', 'all', 250);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'Edition: Shout Factory', 'all', 250);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'Edition: StudioCanal', 'all', 250);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'Edition: Collector''s Edition', 'all', 180);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'Edition: Anniversary Edition', 'all', 180);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'Edition: Unrated', 'all', 180);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', 'Release: Proper-Repack-Rerip', 'all', 30);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', '4K: UHD BluRay Preferred', 'all', 1700);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Compact 4K Movies', '4K: WEB-DL Preferred', 'all', 1100);
+-- Source and release-fix signals proxy bitrate and provenance without hard size gates.
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Source: Remux Preferred', 'all', 1800);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', '4K: UHD BluRay Preferred', 'all', 1200);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', '4K: WEB-DL Preferred', 'all', 600);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', '1080p: UHD BluRay Source Bonus', 'all', 900);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', '1080p: BluRay Preferred', 'all', 1000);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', '1080p: WEB-DL Preferred', 'all', 500);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Release: Proper-Repack-Rerip', 'all', 75);
 
--------------------------------------------------------------------------------
--- Premium 4K movies
--------------------------------------------------------------------------------
+-- Editions are collector refiners, intentionally below technical A/V features.
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Edition: IMAX', 'all', 400);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Edition: IMAX Enhanced', 'all', 450);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Edition: Director''s Cut', 'all', 250);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Edition: Final Cut', 'all', 250);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Edition: Extended', 'all', 200);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Edition: Ultimate Cut', 'all', 200);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Edition: Special Edition', 'all', 150);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Edition: Expanded Ratio', 'all', 150);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Edition: Open Matte', 'all', 150);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Edition: VAR', 'all', 150);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Edition: Remastered', 'all', 125);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Edition: Restored', 'all', 125);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Edition: 4K Scan', 'all', 125);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Edition: New Transfer', 'all', 125);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Edition: Criterion', 'all', 125);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Edition: Arrow', 'all', 100);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Edition: Shout Factory', 'all', 100);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Edition: StudioCanal', 'all', 100);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Edition: Collector''s Edition', 'all', 75);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Edition: Anniversary Edition', 'all', 75);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Movies', 'Edition: Unrated', 'all', 75);
 
-INSERT OR REPLACE INTO quality_profiles (name, description, upgrades_allowed, minimum_custom_format_score, upgrade_until_score, upgrade_score_increment) VALUES ('Alex_C.T - Premium 4K Movies', 'Premium 4K movie profile for richer 2160p encodes with higher bitrates, stronger HDR, and more premium audio. This lane stays below true remux-first behavior, but pushes much closer to that territory than the compact 4K profile.', 1, 10000, 26000, 50);
-INSERT OR REPLACE INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Premium 4K Movies', 'Radarr');
-INSERT OR REPLACE INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Premium 4K Movies', 'Movies');
-INSERT OR REPLACE INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Premium 4K Movies', '4K');
-INSERT OR REPLACE INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Premium 4K Movies', 'Premium');
-INSERT OR REPLACE INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Premium 4K Movies', 'Bluray-2160p', 1, 1, 1);
-INSERT OR REPLACE INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Premium 4K Movies', 'WEBDL-2160p', 2, 1, 0);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'Size Band: 4K Premium Eligible', 'all', 10000);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'Language: Prefer English + Spanish', 'all', 375);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'Language: Spanish Audio Marker', 'all', 250);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'Language: English Marker', 'all', 25);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'Language: English-Only Backup', 'all', 25);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'Language: Multi-Dual Audio Bonus', 'all', 50);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'Subtitles: Prefer English + Spanish', 'all', 60);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'Subtitles: Spanish Bonus', 'all', 40);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'Subtitles: English Bonus', 'all', 25);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'Codec: HEVC-x265 Preferred', 'all', 2200);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'Codec: AV1 Preferred', 'all', 1900);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'Codec: VVC-x266 Future', 'all', 1500);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'Video: 10-bit SDR / Main 10 Fallback', 'all', 500);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'HDR: Base HDR Bonus', 'all', 600);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'HDR: HDR10 Bonus', 'all', 550);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'HDR: HDR10+ Bonus', 'all', 900);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'HDR: Dolby Vision Bonus', 'all', 600);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'HDR: Dolby Vision + HDR Bonus', 'all', 1100);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'HDR: Dolby Vision Only Fallback', 'all', 350);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'Audio: Surround Bonus', 'all', 700);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'Audio: 5.1 Surround Preferred', 'all', 375);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'Audio: 6.1 Bonus', 'all', 200);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'Audio: 7.1 Bonus', 'all', 175);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'Audio: Atmos Bonus', 'all', 1100);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'Audio: Lossless Track Bonus', 'all', 900);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'Audio: EAC3-AC3 Preferred', 'all', 325);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'Audio: AAC Fallback Marker', 'all', 40);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'Audio: Stereo-2.0 Fallback', 'all', 10);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'Edition: IMAX', 'all', 1700);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'Edition: IMAX Enhanced', 'all', 1600);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'Edition: Director''s Cut', 'all', 800);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'Edition: Final Cut', 'all', 800);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'Edition: Extended', 'all', 600);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'Edition: Ultimate Cut', 'all', 600);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'Edition: Special Edition', 'all', 450);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'Edition: Expanded Ratio', 'all', 350);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'Edition: Open Matte', 'all', 350);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'Edition: VAR', 'all', 350);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'Edition: Remastered', 'all', 300);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'Edition: Restored', 'all', 300);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'Edition: 4K Scan', 'all', 300);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'Edition: New Transfer', 'all', 300);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'Edition: Criterion', 'all', 300);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'Edition: Arrow', 'all', 250);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'Edition: Shout Factory', 'all', 250);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'Edition: StudioCanal', 'all', 250);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'Edition: Collector''s Edition', 'all', 180);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'Edition: Anniversary Edition', 'all', 180);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'Edition: Unrated', 'all', 180);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', 'Release: Proper-Repack-Rerip', 'all', 30);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', '4K: UHD BluRay Preferred', 'all', 2300);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Premium 4K Movies', '4K: WEB-DL Preferred', 'all', 1500);
+-- Clone the canonical matrix so all movie profiles tune from one source block.
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score)
+SELECT 'Alex_C.T - Best 1080p Movies', custom_format_name, arr_type, score
+FROM quality_profile_custom_formats WHERE quality_profile_name = 'Alex_C.T - Best Available Movies';
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score)
+SELECT 'Alex_C.T - Best 4K Movies', custom_format_name, arr_type, score
+FROM quality_profile_custom_formats WHERE quality_profile_name = 'Alex_C.T - Best Available Movies';
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score)
+SELECT 'Alex_C.T - Catalog 480p-1080p Movies', custom_format_name, arr_type, score
+FROM quality_profile_custom_formats WHERE quality_profile_name = 'Alex_C.T - Best Available Movies';
 
--------------------------------------------------------------------------------
--- Remux 4K movies
--------------------------------------------------------------------------------
-
-INSERT OR REPLACE INTO quality_profiles (name, description, upgrades_allowed, minimum_custom_format_score, upgrade_until_score, upgrade_score_increment) VALUES ('Alex_C.T - Remux 4K Movies', 'Soft remux-first 4K movie profile. It prefers Remux-2160p first, but still allows premium 4K encodes to compete as fallback candidates when a full remux is unavailable. Additive feature scoring stays intact so the richest HDR, source, and audio combinations still surface clearly.', 1, 10000, 32000, 50);
-INSERT OR REPLACE INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Remux 4K Movies', 'Radarr');
-INSERT OR REPLACE INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Remux 4K Movies', 'Movies');
-INSERT OR REPLACE INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Remux 4K Movies', '4K');
-INSERT OR REPLACE INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Remux 4K Movies', 'Remux');
-INSERT OR REPLACE INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Remux 4K Movies', 'Remux-2160p', 1, 1, 1);
-INSERT OR REPLACE INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Remux 4K Movies', 'Bluray-2160p', 2, 1, 0);
-INSERT OR REPLACE INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Remux 4K Movies', 'WEBDL-2160p', 3, 1, 0);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'Size Band: 4K Premium Eligible', 'all', 10000);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'Size Band: 4K Remux Eligible', 'all', 10000);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'Language: Prefer English + Spanish', 'all', 375);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'Language: Spanish Audio Marker', 'all', 250);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'Language: English Marker', 'all', 25);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'Language: English-Only Backup', 'all', 25);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'Language: Multi-Dual Audio Bonus', 'all', 50);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'Subtitles: Prefer English + Spanish', 'all', 60);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'Subtitles: Spanish Bonus', 'all', 40);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'Subtitles: English Bonus', 'all', 25);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'Codec: HEVC-x265 Preferred', 'all', 2200);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'Codec: AV1 Preferred', 'all', 1900);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'Codec: VVC-x266 Future', 'all', 1500);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'Video: 10-bit SDR / Main 10 Fallback', 'all', 500);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'HDR: Base HDR Bonus', 'all', 600);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'HDR: HDR10 Bonus', 'all', 550);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'HDR: HDR10+ Bonus', 'all', 900);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'HDR: Dolby Vision Bonus', 'all', 600);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'HDR: Dolby Vision + HDR Bonus', 'all', 1100);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'HDR: Dolby Vision Only Fallback', 'all', 350);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'Audio: Surround Bonus', 'all', 700);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'Audio: 5.1 Surround Preferred', 'all', 375);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'Audio: 6.1 Bonus', 'all', 200);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'Audio: 7.1 Bonus', 'all', 175);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'Audio: Atmos Bonus', 'all', 1100);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'Audio: Lossless Track Bonus', 'all', 1200);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'Audio: EAC3-AC3 Preferred', 'all', 325);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'Audio: AAC Fallback Marker', 'all', 40);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'Audio: Stereo-2.0 Fallback', 'all', 10);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'Edition: IMAX', 'all', 1700);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'Edition: IMAX Enhanced', 'all', 1600);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'Edition: Director''s Cut', 'all', 800);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'Edition: Final Cut', 'all', 800);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'Edition: Extended', 'all', 600);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'Edition: Ultimate Cut', 'all', 600);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'Edition: Special Edition', 'all', 450);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'Edition: Expanded Ratio', 'all', 350);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'Edition: Open Matte', 'all', 350);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'Edition: VAR', 'all', 350);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'Edition: Remastered', 'all', 300);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'Edition: Restored', 'all', 300);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'Edition: 4K Scan', 'all', 300);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'Edition: New Transfer', 'all', 300);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'Edition: Criterion', 'all', 300);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'Edition: Arrow', 'all', 250);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'Edition: Shout Factory', 'all', 250);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'Edition: StudioCanal', 'all', 250);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'Edition: Collector''s Edition', 'all', 180);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'Edition: Anniversary Edition', 'all', 180);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'Edition: Unrated', 'all', 180);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', 'Release: Proper-Repack-Rerip', 'all', 30);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', '4K: UHD BluRay Preferred', 'all', 2300);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Remux 4K Movies', '4K: WEB-DL Preferred', 'all', 1500);
-
--------------------------------------------------------------------------------
--- Catalog 480p-1080p movies
--------------------------------------------------------------------------------
-
-INSERT OR REPLACE INTO quality_profiles (name, description, upgrades_allowed, minimum_custom_format_score, upgrade_until_score, upgrade_score_increment) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Additive catalog movie profile for older or hard-to-find titles. Movies only gain credit for features they actually have, so 480p through 1080p options can still float upward on better language, subtitle, codec, HDR, audio, edition, and source signals without any negative movie scores. The score scale is intentionally stretched to 10000 so stronger sources still stand out clearly inside the catalog lane.', 1, 0, 10000, 50);
-INSERT OR REPLACE INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Radarr');
-INSERT OR REPLACE INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Movies');
-INSERT OR REPLACE INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', '1080p');
-INSERT OR REPLACE INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Catalog');
-INSERT OR REPLACE INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Bluray-1080p', 1, 1, 1);
-INSERT OR REPLACE INTO quality_groups (quality_profile_name, name) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'WEB 1080p');
-INSERT OR REPLACE INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'WEB 1080p', 'WEBDL-1080p');
-INSERT OR REPLACE INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'WEB 1080p', 'WEBRip-1080p');
-INSERT OR REPLACE INTO quality_profile_qualities (quality_profile_name, quality_group_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'WEB 1080p', 2, 1, 0);
-INSERT OR REPLACE INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Bluray-720p', 3, 1, 0);
-INSERT OR REPLACE INTO quality_groups (quality_profile_name, name) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'WEB 720p');
-INSERT OR REPLACE INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'WEB 720p', 'WEBDL-720p');
-INSERT OR REPLACE INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'WEB 720p', 'WEBRip-720p');
-INSERT OR REPLACE INTO quality_profile_qualities (quality_profile_name, quality_group_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'WEB 720p', 4, 1, 0);
-INSERT OR REPLACE INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Bluray-576p', 5, 1, 0);
-INSERT OR REPLACE INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Bluray-480p', 6, 1, 0);
-INSERT OR REPLACE INTO quality_groups (quality_profile_name, name) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'WEB 480p');
-INSERT OR REPLACE INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'WEB 480p', 'WEBDL-480p');
-INSERT OR REPLACE INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'WEB 480p', 'WEBRip-480p');
-INSERT OR REPLACE INTO quality_profile_qualities (quality_profile_name, quality_group_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'WEB 480p', 7, 1, 0);
-INSERT OR REPLACE INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'DVD', 8, 1, 0);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Language: Prefer English + Spanish', 'all', 375);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Language: Spanish Audio Marker', 'all', 250);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Language: English Marker', 'all', 25);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Language: English-Only Backup', 'all', 25);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Language: Multi-Dual Audio Bonus', 'all', 50);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Subtitles: Prefer English + Spanish', 'all', 60);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Subtitles: Spanish Bonus', 'all', 40);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Subtitles: English Bonus', 'all', 25);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Codec: HEVC-x265 Preferred', 'all', 1700);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Codec: AV1 Preferred', 'all', 1500);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Codec: VVC-x266 Future', 'all', 1000);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Video: 10-bit SDR / Main 10 Fallback', 'all', 250);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'HDR: Base HDR Bonus', 'all', 300);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'HDR: HDR10 Bonus', 'all', 250);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'HDR: HDR10+ Bonus', 'all', 400);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'HDR: Dolby Vision Bonus', 'all', 250);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'HDR: Dolby Vision + HDR Bonus', 'all', 350);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'HDR: Dolby Vision Only Fallback', 'all', 150);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Audio: Surround Bonus', 'all', 550);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Audio: 5.1 Surround Preferred', 'all', 350);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Audio: 6.1 Bonus', 'all', 180);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Audio: 7.1 Bonus', 'all', 150);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Audio: Atmos Bonus', 'all', 850);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Audio: EAC3-AC3 Preferred', 'all', 220);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Audio: AAC Fallback Marker', 'all', 60);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Audio: Stereo-2.0 Fallback', 'all', 20);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Edition: IMAX', 'all', 1700);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Edition: IMAX Enhanced', 'all', 1600);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Edition: Director''s Cut', 'all', 800);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Edition: Final Cut', 'all', 800);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Edition: Extended', 'all', 600);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Edition: Ultimate Cut', 'all', 600);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Edition: Special Edition', 'all', 450);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Edition: Expanded Ratio', 'all', 350);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Edition: Open Matte', 'all', 350);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Edition: VAR', 'all', 350);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Edition: Remastered', 'all', 300);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Edition: Restored', 'all', 300);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Edition: 4K Scan', 'all', 300);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Edition: New Transfer', 'all', 300);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Edition: Criterion', 'all', 300);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Edition: Arrow', 'all', 250);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Edition: Shout Factory', 'all', 250);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Edition: StudioCanal', 'all', 250);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Edition: Collector''s Edition', 'all', 180);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Edition: Anniversary Edition', 'all', 180);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Edition: Unrated', 'all', 180);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Release: Proper-Repack-Rerip', 'all', 30);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', '1080p: UHD BluRay Source Bonus', 'all', 500);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', '1080p: BluRay Preferred', 'all', 1100);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', '1080p: WEB-DL Preferred', 'all', 700);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', '1080p: WEBRip Source', 'all', 180);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', '1080p: BDRip Source', 'all', 120);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', '720p: BluRay Preferred', 'all', 700);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', '720p: WEB-DL Preferred', 'all', 400);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', '720p: WEBRip Source', 'all', 150);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', '720p: BDRip Source', 'all', 100);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', '576p: BluRay Preferred', 'all', 450);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', '576p: WEB-DL Preferred', 'all', 200);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', '576p: WEBRip Source', 'all', 60);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', '576p: BDRip Source', 'all', 40);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', '480p: BluRay Preferred', 'all', 320);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', '480p: WEB-DL Preferred', 'all', 120);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', '480p: WEBRip Source', 'all', 40);
-INSERT OR REPLACE INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', '480p: BDRip Source', 'all', 20);
-
+-- Catalog-only lower-resolution source refiners.
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', '1080p: WEBRip Source', 'all', 100);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', '1080p: BDRip Source', 'all', 150);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', '720p: BluRay Preferred', 'all', 400);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', '720p: WEB-DL Preferred', 'all', 200);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', '720p: WEBRip Source', 'all', 50);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', '720p: BDRip Source', 'all', 40);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', '576p: BluRay Preferred', 'all', 150);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', '576p: WEB-DL Preferred', 'all', 60);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', '576p: WEBRip Source', 'all', 30);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', '576p: BDRip Source', 'all', 30);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', '480p: BluRay Preferred', 'all', 100);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', '480p: WEB-DL Preferred', 'all', 50);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', '480p: WEBRip Source', 'all', 25);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', '480p: BDRip Source', 'all', 25);

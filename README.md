@@ -1,105 +1,128 @@
-# Alejandro Media Server Profilarr PCD
+# Alejandro Feature-Rich Profilarr PCD
 
-A personal modular Profilarr-compliant database for Radarr and Sonarr, built for Alejandro's shared media-server library setup.
-
-This database contains categorized custom formats, additive individual-feature scoring for movies and series, media-management settings, quality definitions, a delay profile, optional series size guards, and movie size-band helpers for Compact, Premium, and Remux lanes.
+A centralized Profilarr database for Radarr and Sonarr. It favors technically
+rich releases with strong HDR/Dolby Vision, surround or lossless audio, trusted
+sources, and high runtime-aware quality targets without forcing resolution to
+win every comparison.
 
 ## Import order
 
-The files in `ops/` are numbered because dependency order matters:
+The 12 files in `ops/` are ordered because later modules reference definitions
+from earlier modules:
 
 ```text
 ops/01.Core-Tags-Languages-Qualities.sql
+ops/02.Language-Subtitles.sql
+ops/03.Codecs.sql
+ops/04.Video-HDR-Resolution.sql
+ops/05.Audio.sql
+ops/06.Sources-Releases.sql
+ops/07.Editions.sql
+ops/08.Radarr-Movie-Profiles.sql
+ops/09.Sonarr-Series-Profiles.sql
+ops/10.Media-Management.sql
+ops/11.Delay-Profiles.sql
+ops/12.Optional-Size-Guards.sql
+```
+
+GitHub paths are case-sensitive. Keep these filenames exactly as written.
+
+## Module ownership
+
+Each editable concern owns both its regular expressions and custom formats so
+tuning does not require chasing definitions across multiple files.
+
+- `01`: shared tags, languages, and canonical quality names.
+- `02`: English/Spanish language and subtitle matching.
+- `03`: HEVC, AV1, VVC, and x264 codec matching.
+- `04`: 10-bit video, HDR10/HDR10+, Dolby Vision, and resolution preference.
+- `05`: audio codecs, 5.1/6.1/7.1, Atmos, and lossless audio.
+- `06`: Remux, BluRay, WEB-DL, weaker source detectors, and release fixes.
+- `07`: IMAX, cuts, restorations, labels, and other movie editions.
+- `08`: the four Radarr movie profiles and their shared score matrix.
+- `09`: the four Sonarr series profiles and their shared score matrix.
+- `10`: naming, media settings, and runtime-aware quality definitions.
+- `11`: the shared Usenet-first delay profile.
+- `12`: optional movie size bands and series tiny-release helpers.
+
+## Movie profiles
+
+- `Alex_C.T - Best Available Movies`: default. Compares Remux, BluRay, and
+  WEB-DL across 1080p and 2160p in one quality group.
+- `Alex_C.T - Best 1080p Movies`: the same feature scoring, constrained to
+  1080p Remux, BluRay, and WEB-DL.
+- `Alex_C.T - Best 4K Movies`: the same feature scoring, constrained to 2160p
+  Remux, BluRay, and WEB-DL.
+- `Alex_C.T - Catalog 480p-1080p Movies`: relaxed DVD-through-1080p ladder for
+  old or scarce titles.
+
+## Series profiles
+
+- `Alex_C.T - Best Available Series`: default cross-resolution feature group.
+- `Alex_C.T - Best 1080p Series`: strict 1080p feature group.
+- `Alex_C.T - Best 4K Series`: strict 2160p feature group.
+- `Alex_C.T - Catalog 480p-1080p Series`: relaxed archive/catalog ladder.
+
+## Selection philosophy
+
+Radarr and Sonarr normally compare quality position before custom-format score.
+The three primary profiles therefore place their comparable qualities inside a
+single quality group. This lets feature scoring choose between a rich 1080p
+release and a weak 4K release instead of granting 4K an automatic win.
+
+Scoring priorities are:
+
+1. Dolby Vision with HDR fallback, HDR10+, and HDR10.
+2. Atmos, lossless audio, 7.1, 6.1, and strong 5.1 audio.
+3. Remux, UHD BluRay, BluRay, and clean WEB-DL source signals.
+4. A modest 2160p preference so similarly featured 4K wins.
+5. Language, subtitles, codecs, release fixes, and movie editions as refiners.
+
+The primary profiles use a minimum custom-format score of `0`. A usable release
+can download first and continue upgrading toward a feature-rich keeper score of
+`10000`. Codec labels receive modest scores because HEVC or AV1 alone does not
+prove that an encode is good.
+
+## Bitrate and size
+
+Quality definitions in `10.Media-Management.sql` are the main runtime-aware
+MiB-per-minute controls. Their preferred sizes also provide Radarr's final size
+tie-breaker after quality-group and custom-format comparisons.
+
+The total-size helpers in `12.Optional-Size-Guards.sql` are intentionally not
+attached to any managed profile. They remain available for manual experiments,
+but fixed file-size bands distort short and long movies and should not decide
+the default profile.
+
+## Metadata limitation
+
+Custom-format matching currently uses release names. MediaInfo is enabled for
+imports and naming, but release-time codec, HDR, and audio decisions still rely
+on advertised title markers. Runtime-aware quality definitions and source tags
+are therefore strong proxies, not proof of the final stream bitrate.
+
+## Migration from 1.x
+
+Version 2.0 replaces the Compact/Premium/Remux profile grid and reorganizes the
+custom-format modules. Remove these superseded files from `ops/`:
+
+```text
 ops/02.Regular-Expressions-Language-Subtitles.sql
 ops/03.Regular-Expressions-Codecs-HDR-Audio.sql
 ops/04.Regular-Expressions-Resolution-Source-Editions.sql
 ops/05.Custom-Formats-Language-Subtitles.sql
 ops/06.Custom-Formats-Codec-HDR-Audio-Resolution.sql
 ops/07.Custom-Formats-Source-Editions-Releases.sql
-ops/08.Radarr-Movie-Profiles.sql
-ops/09.Sonarr-Series-Profiles.sql
-ops/10.Media-Management.sql
-ops/11.Delay-Profiles.sql
 ops/12.Series-Size-Guards.sql
 ```
 
-GitHub paths are case-sensitive. Keep these filenames exactly as written.
+For a clean Profilarr migration:
 
-## What each file does
+1. Push this complete layout to GitHub.
+2. Unlink or remove the old `Alex_C.T` database in Profilarr.
+3. Link the repository again and rebuild it from GitHub.
+4. Sync the desired profiles and settings to Radarr and Sonarr.
+5. Assign `Best Available` as the default and use the targeted or Catalog
+   profiles only where the title needs that policy.
 
-- `01.Core-Tags-Languages-Qualities.sql`: base tags, languages, and quality names.
-- `02.Regular-Expressions-Language-Subtitles.sql`: EN/ES/Latino language logic and subtitle rules.
-- `03.Regular-Expressions-Codecs-HDR-Audio.sql`: HEVC/AV1/VVC/x264, HDR/DV, and audio rules, including lossless-audio detection.
-- `04.Regular-Expressions-Resolution-Source-Editions.sql`: resolution-specific source rules, 4K gates, editions, and release fixes.
-- `05.Custom-Formats-Language-Subtitles.sql`: language and subtitle custom formats, tags, conditions, and regex bindings.
-- `06.Custom-Formats-Codec-HDR-Audio-Resolution.sql`: codec, HDR, audio, lossless-audio, resolution/source, and movie size-band custom formats.
-- `07.Custom-Formats-Source-Editions-Releases.sql`: source, edition, and release-fix custom formats.
-- `08.Radarr-Movie-Profiles.sql`: Radarr movie profiles for Compact, Premium, Remux, and Catalog lanes.
-- `09.Sonarr-Series-Profiles.sql`: Sonarr series profiles with additive scoring.
-- `10.Media-Management.sql`: Radarr/Sonarr naming, media settings, and quality definitions.
-- `11.Delay-Profiles.sql`: Usenet-first delay profile.
-- `12.Series-Size-Guards.sql`: optional series-only size helper formats for suspiciously tiny TV releases.
-
-## Movie profile set
-
-- `Compact 1080p Movies` and `Compact 4K Movies`: closest to the current behavior. These stay size-aware, keep fully additive feature scoring, and aim for strong everyday encodes.
-- `Premium 1080p Movies` and `Premium 4K Movies`: higher-bitrate encode lanes tuned to ride closer to remux territory while still favoring encoded releases.
-- `Remux 1080p Movies` and `Remux 4K Movies`: soft remux-first lanes. They prefer remux qualities first, but still allow premium encodes as fallback.
-- `Catalog 480p-1080p Movies`: relaxed additive lane for older or harder-to-find titles.
-
-The movie profiles do not have true per-profile bitrate controls because Profilarr quality definitions are global per Arr type. The approximation is:
-
-- Radarr quality definitions provide the main MiB-per-minute rails.
-- Movie size-band custom formats provide per-profile total-size eligibility gates.
-- Additive custom-format scoring still decides which eligible release is best.
-
-That means size bands are total-size proxies, not runtime-normalized bitrate math. They are still useful for keeping each profile inside the space/quality lane you actually want.
-
-## Series profile set
-
-- `1080p-2160p Series`: 1080p-first series lane with compact 2160p fallback.
-- `4K Series`: manual 4K lane for select shows.
-- `Catalog 480p-1080p Series`: relaxed archive/catalog lane.
-
-Series remain additive and keep the optional tiny-episode size guards unattached by default.
-
-## Migration from the old layouts
-
-Delete or move these old files from `ops/` so the repo stays clean:
-
-```text
-ops/1.Smart-Managed-Library.sql
-ops/2.Smart-Plex-Media-Management.sql
-ops/3.Smart-Plex-Delay-Profile.sql
-ops/4.Smart-Plex-Micro-Encode-Guards.sql
-ops/05.Custom-Formats.sql
-ops/06.Radarr-Movie-Profiles.sql
-ops/07.Sonarr-Series-Profiles.sql
-ops/08.Media-Management.sql
-ops/09.Delay-Profiles.sql
-ops/10.Micro-Encode-Guards.sql
-```
-
-Then add the new numbered files.
-
-## Recommended Profilarr workflow
-
-Since this is a full modular restructure:
-
-1. Unlink/remove the old `Alex_C.T` database in Profilarr.
-2. Push this modular repo layout to GitHub.
-3. Link the repo again in Profilarr.
-4. Rebuild/update the database from GitHub.
-5. Sync the desired profiles/settings to Radarr and Sonarr.
-
-## Notes
-
-Movie and series profiles are fully additive. Releases only gain points for features they actually have.
-
-Compound combo formats such as "resolution + codec" or "HDR + surround" are not part of the default scoring path. Source, codec, Main 10, HDR tiers, audio tiers, lossless audio, release fixes, and editions are all rewarded individually so the ladders stay easier to reason about and maintain.
-
-Movie profile weights are intentionally stretched so stacked feature-rich releases can land much closer to the visible top of each lane without bringing back compound combo formats. This makes the score far more useful as a quick at-a-glance quality signal inside Profilarr.
-
-MediaInfo is enabled for import-time metadata and for the rename templates, but the current PCD schema still exposes custom-format condition types such as `release_title`, `size`, `source`, and `resolution`. Codec, HDR, audio, and edition custom formats therefore still depend on release naming rather than true MediaInfo-backed custom-format matching at this layer today.
-
-Strict blocking custom formats still exist in the categorized custom-format files for optional use if you want harsher profiles again later.
+Run `validate_manifest.py` after every structural or profile change.
