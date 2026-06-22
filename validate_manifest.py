@@ -61,8 +61,39 @@ SERIES_PROFILES = {
 }
 EXPECTED_PROFILES = MOVIE_PROFILES | SERIES_PROFILES
 
-STRICT_1080P_QUALITIES = {"Bluray-1080p", "WEBDL-1080p"}
-STRICT_4K_QUALITIES = {"Bluray-2160p", "WEBDL-2160p"}
+EXPECTED_QUALITY_ORDER = {
+    "Alex_C.T - Best 1080p Movies": ["Bluray-1080p", "WEBDL-1080p"],
+    "Alex_C.T - Best 4K Movies": ["Bluray-2160p", "WEBDL-2160p"],
+    "Alex_C.T - Catalog 480p-1080p Movies": [
+        "Bluray-1080p",
+        "WEBDL-1080p",
+        "WEBRip-1080p",
+        "Bluray-720p",
+        "WEBDL-720p",
+        "WEBRip-720p",
+        "Bluray-576p",
+        "Bluray-480p",
+        "WEBDL-480p",
+        "WEBRip-480p",
+        "DVD",
+    ],
+    "Alex_C.T - Best 1080p Series": ["Bluray-1080p", "WEBDL-1080p"],
+    "Alex_C.T - Best 4K Series": ["Bluray-2160p", "WEBDL-2160p"],
+    "Alex_C.T - Catalog 480p-1080p Series": [
+        "Bluray-1080p",
+        "WEBDL-1080p",
+        "WEBRip-1080p",
+        "Bluray-720p",
+        "WEBDL-720p",
+        "WEBRip-720p",
+        "HDTV-720p",
+        "Bluray-576p",
+        "Bluray-480p",
+        "WEBDL-480p",
+        "WEBRip-480p",
+        "DVD",
+    ],
+}
 
 errors = []
 
@@ -97,8 +128,8 @@ for key in ["name", "version", "description", "arr_types", "dependencies", "prof
     if key not in data:
         fail(f"pcd.json missing required key: {key}")
 
-if data.get("version") != "4.0.1":
-    fail("pcd.json version should be 4.0.1 for the explicit BluRay + WEB-DL group labels")
+if data.get("version") != "4.1.0":
+    fail("pcd.json version should be 4.1.0 for direct checked qualities without custom groups")
 if sorted(data.get("arr_types", [])) != ["radarr", "sonarr"]:
     fail("pcd.json arr_types should be exactly ['radarr', 'sonarr']")
 if data.get("profilarr", {}).get("minimum_version") != "2.0.0":
@@ -109,6 +140,10 @@ combined = "\n".join(texts.values())
 
 profile_literal_pattern = r"Alex_C\.T - [^'`\r\n]+(?:Movies|Series)"
 profile_module_text = texts.get("08.Radarr-Movie-Profiles.sql", "") + texts.get("09.Sonarr-Series-Profiles.sql", "")
+for group_table in ["quality_groups", "quality_group_members", "quality_group_name"]:
+    if group_table in profile_module_text:
+        fail(f"Profile modules must use direct checked qualities, found: {group_table}")
+
 profile_literals = set(re.findall(profile_literal_pattern, profile_module_text))
 if profile_literals != EXPECTED_PROFILES:
     fail(
@@ -272,22 +307,22 @@ if not errors:
         if row is None or int(row[0]) != 0 or int(row[1]) != 10000:
             fail(f"{profile} should use minimum score 0 and keeper score 10000")
 
-    expected_groups = {
-        ("Alex_C.T - Best 1080p Movies", "BluRay + WEB-DL 1080p"): STRICT_1080P_QUALITIES,
-        ("Alex_C.T - Best 4K Movies", "BluRay + WEB-DL 4K"): STRICT_4K_QUALITIES,
-        ("Alex_C.T - Best 1080p Series", "BluRay + WEB-DL 1080p"): STRICT_1080P_QUALITIES,
-        ("Alex_C.T - Best 4K Series", "BluRay + WEB-DL 4K"): STRICT_4K_QUALITIES,
-    }
-    for (profile, group), expected in expected_groups.items():
-        actual = {
-            row[0]
-            for row in connection.execute(
-                "SELECT quality_name FROM quality_group_members WHERE quality_profile_name = ? AND quality_group_name = ?",
-                (profile, group),
+    for profile, expected_order in EXPECTED_QUALITY_ORDER.items():
+        rows = list(
+            connection.execute(
+                "SELECT quality_name, position, enabled, upgrade_until "
+                "FROM quality_profile_qualities WHERE quality_profile_name = ? ORDER BY position",
+                (profile,),
             )
-        }
-        if actual != expected:
-            fail(f"{profile} group members differ: expected={sorted(expected)}, actual={sorted(actual)}")
+        )
+        actual_order = [row[0] for row in rows]
+        if actual_order != expected_order:
+            fail(f"{profile} checked-quality order differs: expected={expected_order}, actual={actual_order}")
+        if any(int(row[2]) != 1 for row in rows):
+            fail(f"{profile} should enable every listed quality")
+        cutoffs = [row[0] for row in rows if int(row[3]) == 1]
+        if cutoffs != expected_order[:1]:
+            fail(f"{profile} should upgrade through its first listed quality: {expected_order[0]}")
 
     def score_map(profile):
         return {
@@ -332,8 +367,6 @@ if not errors:
 
     remux_members = list(
         connection.execute(
-            "SELECT quality_profile_name, quality_name FROM quality_group_members WHERE quality_name LIKE 'Remux-%' "
-            "UNION ALL "
             "SELECT quality_profile_name, quality_name FROM quality_profile_qualities WHERE quality_name LIKE 'Remux-%'"
         )
     )

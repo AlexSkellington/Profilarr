@@ -2,8 +2,8 @@
 -- 08: Radarr movie quality profiles and scoring.
 -- Requires 01 through 07.
 --
--- The strict profiles compare BluRay and WEB-DL inside one resolution-specific
--- group so existing custom-format scores choose the best file. Catalog keeps an ordered,
+-- The strict profiles enable only the default BluRay and WEB-DL qualities for
+-- their resolution. Catalog keeps an ordered,
 -- permissive DVD-through-1080p fallback ladder. Remux is never enabled.
 
 -- Rebuild only the current managed movie profiles.
@@ -11,15 +11,7 @@ DELETE FROM quality_profile_custom_formats WHERE quality_profile_name IN (
   'Alex_C.T - Best 1080p Movies', 'Alex_C.T - Best 4K Movies',
   'Alex_C.T - Catalog 480p-1080p Movies'
 );
-DELETE FROM quality_group_members WHERE quality_profile_name IN (
-  'Alex_C.T - Best 1080p Movies', 'Alex_C.T - Best 4K Movies',
-  'Alex_C.T - Catalog 480p-1080p Movies'
-);
 DELETE FROM quality_profile_qualities WHERE quality_profile_name IN (
-  'Alex_C.T - Best 1080p Movies', 'Alex_C.T - Best 4K Movies',
-  'Alex_C.T - Catalog 480p-1080p Movies'
-);
-DELETE FROM quality_groups WHERE quality_profile_name IN (
   'Alex_C.T - Best 1080p Movies', 'Alex_C.T - Best 4K Movies',
   'Alex_C.T - Catalog 480p-1080p Movies'
 );
@@ -40,41 +32,31 @@ INSERT INTO quality_profiles (name, description, upgrades_allowed, minimum_custo
 INSERT INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Best 1080p Movies', 'Radarr');
 INSERT INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Best 1080p Movies', 'Movies');
 INSERT INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Best 1080p Movies', '1080p');
-INSERT INTO quality_groups (quality_profile_name, name) VALUES ('Alex_C.T - Best 1080p Movies', 'BluRay + WEB-DL 1080p');
-INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - Best 1080p Movies', 'BluRay + WEB-DL 1080p', 'Bluray-1080p');
-INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - Best 1080p Movies', 'BluRay + WEB-DL 1080p', 'WEBDL-1080p');
-INSERT INTO quality_profile_qualities (quality_profile_name, quality_group_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Best 1080p Movies', 'BluRay + WEB-DL 1080p', 1, 1, 1);
+INSERT INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Best 1080p Movies', 'Bluray-1080p', 1, 1, 1);
+INSERT INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Best 1080p Movies', 'WEBDL-1080p', 2, 1, 0);
 
 INSERT INTO quality_profiles (name, description, upgrades_allowed, minimum_custom_format_score, upgrade_until_score, upgrade_score_increment) VALUES ('Alex_C.T - Best 4K Movies', '4K movie profile containing 2160p BluRay and WEB-DL. Remux is not enabled.', 1, 0, 10000, 50);
 INSERT INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Best 4K Movies', 'Radarr');
 INSERT INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Best 4K Movies', 'Movies');
 INSERT INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Best 4K Movies', '4K');
-INSERT INTO quality_groups (quality_profile_name, name) VALUES ('Alex_C.T - Best 4K Movies', 'BluRay + WEB-DL 4K');
-INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - Best 4K Movies', 'BluRay + WEB-DL 4K', 'Bluray-2160p');
-INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - Best 4K Movies', 'BluRay + WEB-DL 4K', 'WEBDL-2160p');
-INSERT INTO quality_profile_qualities (quality_profile_name, quality_group_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Best 4K Movies', 'BluRay + WEB-DL 4K', 1, 1, 1);
+INSERT INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Best 4K Movies', 'Bluray-2160p', 1, 1, 1);
+INSERT INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Best 4K Movies', 'WEBDL-2160p', 2, 1, 0);
 
 INSERT INTO quality_profiles (name, description, upgrades_allowed, minimum_custom_format_score, upgrade_until_score, upgrade_score_increment) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Permissive DVD-through-1080p movie ladder for older and scarce titles.', 1, 0, 10000, 50);
 INSERT INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Radarr');
 INSERT INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Movies');
 INSERT INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Catalog');
 INSERT INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Bluray-1080p', 1, 1, 1);
-INSERT INTO quality_groups (quality_profile_name, name) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'WEB 1080p');
-INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'WEB 1080p', 'WEBDL-1080p');
-INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'WEB 1080p', 'WEBRip-1080p');
-INSERT INTO quality_profile_qualities (quality_profile_name, quality_group_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'WEB 1080p', 2, 1, 0);
-INSERT INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Bluray-720p', 3, 1, 0);
-INSERT INTO quality_groups (quality_profile_name, name) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'WEB 720p');
-INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'WEB 720p', 'WEBDL-720p');
-INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'WEB 720p', 'WEBRip-720p');
-INSERT INTO quality_profile_qualities (quality_profile_name, quality_group_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'WEB 720p', 4, 1, 0);
-INSERT INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Bluray-576p', 5, 1, 0);
-INSERT INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Bluray-480p', 6, 1, 0);
-INSERT INTO quality_groups (quality_profile_name, name) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'WEB 480p');
-INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'WEB 480p', 'WEBDL-480p');
-INSERT INTO quality_group_members (quality_profile_name, quality_group_name, quality_name) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'WEB 480p', 'WEBRip-480p');
-INSERT INTO quality_profile_qualities (quality_profile_name, quality_group_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'WEB 480p', 7, 1, 0);
-INSERT INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'DVD', 8, 1, 0);
+INSERT INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'WEBDL-1080p', 2, 1, 0);
+INSERT INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'WEBRip-1080p', 3, 1, 0);
+INSERT INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Bluray-720p', 4, 1, 0);
+INSERT INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'WEBDL-720p', 5, 1, 0);
+INSERT INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'WEBRip-720p', 6, 1, 0);
+INSERT INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Bluray-576p', 7, 1, 0);
+INSERT INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Bluray-480p', 8, 1, 0);
+INSERT INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'WEBDL-480p', 9, 1, 0);
+INSERT INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'WEBRip-480p', 10, 1, 0);
+INSERT INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'DVD', 11, 1, 0);
 
 -------------------------------------------------------------------------------
 -- Shared movie scoring: technical features dominate resolution and editions.

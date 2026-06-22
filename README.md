@@ -46,15 +46,15 @@ tuning does not require chasing definitions across multiple files.
 
 ## Movie profiles
 
-- `Alex_C.T - Best 1080p Movies`: default BluRay + WEB-DL 1080p group.
-- `Alex_C.T - Best 4K Movies`: BluRay + WEB-DL 4K group.
+- `Alex_C.T - Best 1080p Movies`: checks Bluray-1080p and WEBDL-1080p.
+- `Alex_C.T - Best 4K Movies`: checks Bluray-2160p and WEBDL-2160p.
 - `Alex_C.T - Catalog 480p-1080p Movies`: relaxed DVD-through-1080p ladder for
   old or scarce titles.
 
 ## Series profiles
 
-- `Alex_C.T - Best 1080p Series`: default BluRay + WEB-DL 1080p group.
-- `Alex_C.T - Best 4K Series`: BluRay + WEB-DL 4K group.
+- `Alex_C.T - Best 1080p Series`: checks Bluray-1080p and WEBDL-1080p.
+- `Alex_C.T - Best 4K Series`: checks Bluray-2160p and WEBDL-2160p.
 - `Alex_C.T - Catalog 480p-1080p Series`: relaxed archive/catalog ladder.
 
 Only these six movie and series profiles are created. No compatibility aliases
@@ -62,11 +62,11 @@ or retired profile names are retained.
 
 ## Selection philosophy
 
-Radarr and Sonarr normally compare quality position before custom-format score.
-Each strict profile therefore places BluRay and WEB-DL for its resolution in a
-single quality group. Source is a meaningful factor, but HDR, audio, codec,
-language, and edition features can still identify the better overall file.
-Catalog remains an ordered ladder because availability matters most there.
+Radarr and Sonarr compare quality position before custom-format score. Each
+strict profile checks BluRay first and WEB-DL second using the default qualities,
+without creating custom groups. Custom-format scores rank competing releases
+inside each checked quality. Catalog checks its fallback qualities individually
+in descending order because availability matters most there.
 
 Scoring priorities are:
 
