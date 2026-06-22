@@ -128,8 +128,8 @@ for key in ["name", "version", "description", "arr_types", "dependencies", "prof
     if key not in data:
         fail(f"pcd.json missing required key: {key}")
 
-if data.get("version") != "4.1.0":
-    fail("pcd.json version should be 4.1.0 for direct checked qualities without custom groups")
+if data.get("version") != "4.1.1":
+    fail("pcd.json version should be 4.1.1 for cumulative movie size bonuses")
 if sorted(data.get("arr_types", [])) != ["radarr", "sonarr"]:
     fail("pcd.json arr_types should be exactly ['radarr', 'sonarr']")
 if data.get("profilarr", {}).get("minimum_version") != "2.0.0":
@@ -243,7 +243,7 @@ def expected_owner(name):
         return "04.Video-HDR-Resolution.sql"
     if name.startswith("Edition:"):
         return "07.Editions.sql"
-    if name.startswith("Size Guard:"):
+    if name.startswith(("Size Guard:", "Size Bonus:")):
         return "12.Optional-Size-Guards.sql"
     return "06.Sources-Releases.sql"
 
@@ -264,7 +264,7 @@ required_markers = {
     "07.Editions.sql": ["Edition: IMAX", "Edition: Director''s Cut"],
     "10.Media-Management.sql": ["Alex_CT Media Server Radarr Quality Definitions", "Alex_CT Media Server Sonarr Quality Definitions"],
     "11.Delay-Profiles.sql": ["Alex_CT Media Server Usenet Preferred Delay"],
-    "12.Optional-Size-Guards.sql": ["Size Guard: 1080p Episode Tiny Encode", "Size Guard: 4K Episode Tiny Encode"],
+    "12.Optional-Size-Guards.sql": ["Size Bonus: 1080p 8 GiB+", "Size Bonus: 4K 32 GiB+", "Size Guard: 4K Episode Tiny Encode"],
 }
 for filename, markers in required_markers.items():
     for marker in markers:
@@ -333,15 +333,19 @@ if not errors:
             )
         }
 
+    def without_size_bonus(scores):
+        return {name: score for name, score in scores.items() if not name.startswith("Size Bonus:")}
+
     movie_scores = score_map("Alex_C.T - Best 1080p Movies")
+    movie_base_scores = without_size_bonus(movie_scores)
     series_scores = score_map("Alex_C.T - Best 1080p Series")
-    if score_map("Alex_C.T - Best 4K Movies") != movie_scores:
-        fail("Alex_C.T - Best 4K Movies should inherit the canonical movie score matrix")
+    if without_size_bonus(score_map("Alex_C.T - Best 4K Movies")) != movie_base_scores:
+        fail("Alex_C.T - Best 4K Movies should inherit the canonical movie score matrix before size bonuses")
     if score_map("Alex_C.T - Best 4K Series") != series_scores:
         fail("Alex_C.T - Best 4K Series should inherit the canonical series score matrix")
 
     for catalog, canonical in [
-        ("Alex_C.T - Catalog 480p-1080p Movies", movie_scores),
+        ("Alex_C.T - Catalog 480p-1080p Movies", movie_base_scores),
         ("Alex_C.T - Catalog 480p-1080p Series", series_scores),
     ]:
         catalog_scores = score_map(catalog)
@@ -364,6 +368,56 @@ if not errors:
             fail(f"{profile} should value Atmos above a codec label")
         if scores.get("Audio: 7.1 Bonus", 0) <= scores.get("Audio: 5.1 Surround Preferred", 0):
             fail(f"{profile} should prefer 7.1 while retaining strong 5.1 credit")
+
+    expected_size_bonus_scores = {
+        "Alex_C.T - Best 1080p Movies": {
+            "Size Bonus: 1080p 8 GiB+": 100,
+            "Size Bonus: 1080p 12 GiB+": 100,
+            "Size Bonus: 1080p 18 GiB+": 100,
+        },
+        "Alex_C.T - Best 4K Movies": {
+            "Size Bonus: 4K 14 GiB+": 100,
+            "Size Bonus: 4K 22 GiB+": 100,
+            "Size Bonus: 4K 32 GiB+": 100,
+        },
+    }
+    for profile in EXPECTED_PROFILES:
+        actual = {
+            name: score for name, score in score_map(profile).items() if name.startswith("Size Bonus:")
+        }
+        expected = expected_size_bonus_scores.get(profile, {})
+        if actual != expected:
+            fail(f"{profile} size bonuses differ: expected={expected}, actual={actual}")
+
+    expected_size_thresholds = {
+        "Size Bonus: 1080p 8 GiB+": (8589934592, None),
+        "Size Bonus: 1080p 12 GiB+": (12884901888, None),
+        "Size Bonus: 1080p 18 GiB+": (19327352832, None),
+        "Size Bonus: 4K 14 GiB+": (15032385536, None),
+        "Size Bonus: 4K 22 GiB+": (23622320128, None),
+        "Size Bonus: 4K 32 GiB+": (34359738368, None),
+    }
+    actual_size_thresholds = {
+        row[0]: (int(row[1]), row[2])
+        for row in connection.execute(
+            "SELECT custom_format_name, min_bytes, max_bytes FROM condition_sizes "
+            "WHERE custom_format_name LIKE 'Size Bonus:%'"
+        )
+    }
+    if actual_size_thresholds != expected_size_thresholds:
+        fail(
+            f"Movie size-bonus thresholds differ: expected={expected_size_thresholds}, "
+            f"actual={actual_size_thresholds}"
+        )
+
+    non_radarr_size_conditions = list(
+        connection.execute(
+            "SELECT custom_format_name, name, arr_type FROM custom_format_conditions "
+            "WHERE custom_format_name LIKE 'Size Bonus:%' AND arr_type != 'radarr'"
+        )
+    )
+    if non_radarr_size_conditions:
+        fail(f"Movie size bonuses must remain Radarr-only: {non_radarr_size_conditions}")
 
     remux_members = list(
         connection.execute(
