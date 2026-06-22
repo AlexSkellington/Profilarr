@@ -4,8 +4,8 @@
 --
 -- The three primary profiles share one technical score matrix. The default
 -- compares 1080p and 2160p directly, while the targeted profiles constrain
--- that same decision model to a specific resolution. Resolution itself has
--- no score, and equivalent sources score equally across resolutions.
+-- that same decision model to a specific resolution. Equivalent 1080p sources
+-- receive a 2000-point preference, requiring exceptional A/V features for 4K to win.
 
 -- Remove superseded and current managed series profiles before rebuilding them.
 DELETE FROM quality_profile_custom_formats WHERE quality_profile_name IN (
@@ -49,7 +49,7 @@ DELETE FROM quality_profiles WHERE name IN (
 -- Profile quality groups
 -------------------------------------------------------------------------------
 
-INSERT INTO quality_profiles (name, description, upgrades_allowed, minimum_custom_format_score, upgrade_until_score, upgrade_score_increment) VALUES ('Alex_C.T - Best Available Series', 'Default resolution-neutral, feature-first series profile. It compares BluRay and WEB-DL releases across 1080p and 2160p in one quality group so HDR, Dolby Vision, audio, source, and language richness choose the winner. Remux is reserved for the resolution-specific profiles.', 1, 0, 10000, 100);
+INSERT INTO quality_profiles (name, description, upgrades_allowed, minimum_custom_format_score, upgrade_until_score, upgrade_score_increment) VALUES ('Alex_C.T - Best Available Series', 'Default feature-first series profile with a strong 1080p preference. It compares BluRay and WEB-DL releases across 1080p and 2160p in one quality group; equivalent 1080p sources receive a 2000-point preference, so 4K wins only with an exceptional HDR, Dolby Vision, audio, or language advantage. Remux is reserved for the resolution-specific profiles.', 1, 0, 10000, 100);
 INSERT INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Best Available Series', 'Sonarr');
 INSERT INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Best Available Series', 'Series');
 INSERT INTO quality_groups (quality_profile_name, name) VALUES ('Alex_C.T - Best Available Series', 'Feature-Rich 1080p-2160p');
@@ -117,6 +117,7 @@ INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_
 INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Series', 'Subtitles: Spanish Bonus', 'all', 60);
 INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Series', 'Subtitles: English Bonus', 'all', 40);
 
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Series', 'Video: 1080p Preference', 'all', 2000);
 INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Series', 'Codec: HEVC-x265 Preferred', 'all', 400);
 INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Series', 'Codec: AV1 Preferred', 'all', 350);
 INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best Available Series', 'Codec: VVC-x266 Future', 'all', 200);
@@ -148,13 +149,13 @@ INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_
 -- Clone the canonical matrix so all series profiles tune from one source block.
 INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score)
 SELECT 'Alex_C.T - Best 1080p Series', custom_format_name, arr_type, score
-FROM quality_profile_custom_formats WHERE quality_profile_name = 'Alex_C.T - Best Available Series';
+FROM quality_profile_custom_formats WHERE quality_profile_name = 'Alex_C.T - Best Available Series' AND custom_format_name <> 'Video: 1080p Preference';
 INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score)
 SELECT 'Alex_C.T - Best 4K Series', custom_format_name, arr_type, score
-FROM quality_profile_custom_formats WHERE quality_profile_name = 'Alex_C.T - Best Available Series';
+FROM quality_profile_custom_formats WHERE quality_profile_name = 'Alex_C.T - Best Available Series' AND custom_format_name <> 'Video: 1080p Preference';
 INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score)
 SELECT 'Alex_C.T - Catalog 480p-1080p Series', custom_format_name, arr_type, score
-FROM quality_profile_custom_formats WHERE quality_profile_name = 'Alex_C.T - Best Available Series';
+FROM quality_profile_custom_formats WHERE quality_profile_name = 'Alex_C.T - Best Available Series' AND custom_format_name <> 'Video: 1080p Preference';
 
 -- Remux is intentionally exclusive to resolution-specific profiles.
 INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best 1080p Series', 'Source: Remux Preferred', 'all', 1800);

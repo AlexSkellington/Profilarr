@@ -48,8 +48,8 @@ tuning does not require chasing definitions across multiple files.
 ## Movie profiles
 
 - `Alex_C.T - Best Available Movies`: default. Compares BluRay and WEB-DL
-  across 1080p and 2160p without awarding points for resolution; it does not
-  accept Remux.
+  across 1080p and 2160p with a strong 2000-point preference for equivalent
+  1080p sources; it does not accept Remux.
 - `Alex_C.T - Best 1080p Movies`: the same feature scoring, constrained to
   1080p Remux, BluRay, and WEB-DL.
 - `Alex_C.T - Best 4K Movies`: the same feature scoring, constrained to 2160p
@@ -60,7 +60,7 @@ tuning does not require chasing definitions across multiple files.
 ## Series profiles
 
 - `Alex_C.T - Best Available Series`: default cross-resolution BluRay/WEB-DL
-  feature group with no resolution bonus; it does not accept Remux.
+  feature group with the same strong 1080p preference; it does not accept Remux.
 - `Alex_C.T - Best 1080p Series`: strict 1080p feature group.
 - `Alex_C.T - Best 4K Series`: strict 2160p feature group.
 - `Alex_C.T - Catalog 480p-1080p Series`: relaxed archive/catalog ladder.
@@ -82,8 +82,8 @@ Scoring priorities are:
 2. Atmos, lossless audio, 7.1, 6.1, and strong 5.1 audio.
 3. UHD BluRay, BluRay, and clean WEB-DL source signals; Remux is added only to
    the resolution-specific 1080p and 4K profiles.
-4. No resolution preference: equivalent BluRay and WEB-DL sources score the
-   same at 1080p and 2160p.
+4. A 2000-point 1080p preference: 4K must supply an exceptional HDR, Dolby
+   Vision, audio, or combined feature advantage to win.
 5. Language, subtitles, codecs, release fixes, and movie editions as refiners.
 
 The primary profiles use a minimum custom-format score of `0`. A usable release

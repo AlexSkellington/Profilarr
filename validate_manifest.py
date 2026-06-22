@@ -105,8 +105,8 @@ for key in ["name", "version", "description", "arr_types", "dependencies", "prof
     if key not in data:
         fail(f"pcd.json missing required key: {key}")
 
-if data.get("version") != "3.0.2":
-    fail("pcd.json version should be 3.0.2 for resolution-neutral defaults")
+if data.get("version") != "3.0.3":
+    fail("pcd.json version should be 3.0.3 for the strong 1080p preference")
 if sorted(data.get("arr_types", [])) != ["radarr", "sonarr"]:
     fail("pcd.json arr_types should be exactly ['radarr', 'sonarr']")
 if data.get("profilarr", {}).get("minimum_version") != "2.0.0":
@@ -213,7 +213,7 @@ for filename, text in texts.items():
 required_markers = {
     "02.Language-Subtitles.sql": ["Language: Prefer English + Spanish", "Subtitles: Prefer English + Spanish"],
     "03.Codecs.sql": ["Codec: HEVC-x265 Preferred", "Codec: AV1 Preferred"],
-    "04.Video-HDR-Resolution.sql": ["Video: 2160p Resolution Bonus", "HDR: Dolby Vision + HDR Bonus"],
+    "04.Video-HDR-Resolution.sql": ["Video: 1080p Preference", "Video: 2160p Resolution Bonus", "HDR: Dolby Vision + HDR Bonus"],
     "05.Audio.sql": ["Audio: 7.1 Bonus", "Audio: Lossless Track Bonus", "Audio: Atmos Bonus"],
     "06.Sources-Releases.sql": ["Source: Remux Preferred", "Release: Proper-Repack-Rerip"],
     "07.Editions.sql": ["Edition: IMAX", "Edition: Director''s Cut"],
@@ -293,12 +293,12 @@ if not errors:
     movie_scores = score_map("Alex_C.T - Best Available Movies")
     series_scores = score_map("Alex_C.T - Best Available Series")
     for sibling in ["Alex_C.T - Best 1080p Movies", "Alex_C.T - Best 4K Movies"]:
-        expected = dict(movie_scores)
+        expected = {name: score for name, score in movie_scores.items() if name != "Video: 1080p Preference"}
         expected["Source: Remux Preferred"] = 1800
         if score_map(sibling) != expected:
             fail(f"{sibling} should inherit the movie matrix plus the Remux preference")
     for sibling in ["Alex_C.T - Best 1080p Series", "Alex_C.T - Best 4K Series"]:
-        expected = dict(series_scores)
+        expected = {name: score for name, score in series_scores.items() if name != "Video: 1080p Preference"}
         expected["Source: Remux Preferred"] = 1800
         if score_map(sibling) != expected:
             fail(f"{sibling} should inherit the series matrix plus the Remux preference")
@@ -308,7 +308,8 @@ if not errors:
         ("Alex_C.T - Catalog 480p-1080p Series", series_scores),
     ]:
         catalog_scores = score_map(catalog)
-        if any(catalog_scores.get(name) != score for name, score in canonical.items()):
+        inherited_scores = {name: score for name, score in canonical.items() if name != "Video: 1080p Preference"}
+        if any(catalog_scores.get(name) != score for name, score in inherited_scores.items()):
             fail(f"{catalog} does not preserve the canonical feature score matrix")
 
     for profile, scores in [
@@ -320,9 +321,22 @@ if not errors:
         if "1080p: UHD BluRay Source Bonus" in scores:
             fail(f"{profile} must not stack a resolution-specific UHD-source bonus")
         if scores.get("4K: UHD BluRay Preferred") != scores.get("1080p: BluRay Preferred"):
-            fail(f"{profile} should score BluRay sources equally across resolutions")
+            fail(f"{profile} should score BluRay sources equally before the explicit 1080p preference")
         if scores.get("4K: WEB-DL Preferred") != scores.get("1080p: WEB-DL Preferred"):
-            fail(f"{profile} should score WEB-DL sources equally across resolutions")
+            fail(f"{profile} should score WEB-DL sources equally before the explicit 1080p preference")
+        resolution_preference = scores.get("Video: 1080p Preference", 0)
+        if resolution_preference != 2000:
+            fail(f"{profile} should carry exactly a 2000-point 1080p preference")
+        standard_hdr_advantage = scores.get("HDR: Base HDR Bonus", 0) + scores.get("HDR: HDR10 Bonus", 0)
+        exceptional_hdr_advantage = (
+            scores.get("HDR: Base HDR Bonus", 0)
+            + scores.get("HDR: Dolby Vision Bonus", 0)
+            + scores.get("HDR: Dolby Vision + HDR Bonus", 0)
+        )
+        if standard_hdr_advantage >= resolution_preference:
+            fail(f"{profile} should not let ordinary HDR10 alone overturn the 1080p preference")
+        if exceptional_hdr_advantage <= resolution_preference:
+            fail(f"{profile} should still let exceptional Dolby Vision plus HDR overturn the 1080p preference")
         if scores.get("Audio: Atmos Bonus", 0) <= scores.get("Codec: HEVC-x265 Preferred", 0):
             fail(f"{profile} should value Atmos above a codec label")
         if scores.get("Audio: 7.1 Bonus", 0) <= scores.get("Audio: 5.1 Surround Preferred", 0):
@@ -336,6 +350,10 @@ if not errors:
     ]:
         if "Source: Remux Preferred" in score_map(profile):
             fail(f"{profile} must not carry the resolution-specific Remux preference")
+
+    for profile in EXPECTED_PROFILES - {"Alex_C.T - Best Available Movies", "Alex_C.T - Best Available Series"}:
+        if "Video: 1080p Preference" in score_map(profile):
+            fail(f"{profile} must not inherit the Best Available 1080p preference")
 
     for profile in [
         "Alex_C.T - Best 1080p Movies",
@@ -402,6 +420,16 @@ if not errors:
     ).fetchone()
     if resolution_pattern is None or "uhd" in resolution_pattern[0].lower():
         fail("The 2160p bonus must not treat UHD-source 1080p encodes as 4K")
+
+    preference_pattern = connection.execute(
+        "SELECT pattern FROM regular_expressions WHERE name = 'Video: 1080p Preference'"
+    ).fetchone()
+    if preference_pattern is None:
+        fail("The 1080p preference regex is missing")
+    elif re.search(preference_pattern[0], "Movie.1080p.BluRay") is None or re.search(
+        preference_pattern[0], "Movie.2160p.BluRay"
+    ):
+        fail("The 1080p preference must match true 1080p releases and exclude 2160p")
 
 connection.close()
 
