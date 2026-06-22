@@ -58,10 +58,14 @@ tuning does not require chasing definitions across multiple files.
 
 ## Series profiles
 
-- `Alex_C.T - Best Available Series`: default cross-resolution feature group.
+- `Alex_C.T - 1080p-2160p Series`: default cross-resolution feature group.
 - `Alex_C.T - Best 1080p Series`: strict 1080p feature group.
-- `Alex_C.T - Best 4K Series`: strict 2160p feature group.
+- `Alex_C.T - 4K Series`: strict 2160p feature group.
 - `Alex_C.T - Catalog 480p-1080p Series`: relaxed archive/catalog ladder.
+
+The default and 4K series profiles retain their established names so existing
+Profilarr database and Sonarr sync mappings continue resolving after the v2
+behavior upgrade.
 
 ## Selection philosophy
 

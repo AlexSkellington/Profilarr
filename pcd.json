@@ -1,6 +1,6 @@
 {
   "name": "Alex_C.T",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Alejandro's centralized media-server database for Radarr and Sonarr, with feature-first default, 1080p, 4K, and Catalog profiles plus concern-focused language, codec, video, audio, source, edition, and optional size modules.",
   "arr_types": [
     "radarr",
