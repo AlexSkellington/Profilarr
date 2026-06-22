@@ -1,12 +1,7 @@
-﻿-- Alex_C.T modular Profilarr v2 PCD operations.
+﻿-- Alex_C.T modular Profilarr v4 PCD operations.
 -- 06: Source-quality and release-fix regexes, custom formats, conditions, and bindings.
 -- Requires 01.
 
-INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Source: Remux Preferred', '(?i)\b(?:remux|bdremux|blu[ ._-]?ray[ ._-]?remux|bdrip[ ._-]?remux)\b', 'Positive source signal for true Remux releases. Raw disks and BR-DISK releases are intentionally excluded.');
-INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Source: Remux Preferred', 'Remux');
-INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Source: Remux Preferred', 'Scoring');
-INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Source: Block Remux-Raw Disk', '(?i)\b(?:remux|bdremux|blu[ ._-]?ray[ ._-]?remux|br[ ._-]?disk|bd[ ._-]?disk|bdrip[ ._-]?remux|raw[ ._-]?hd)\b', 'Optional strict detector for remux, BD remux, BR-DISK, BD-DISK, and raw HD style releases. The default additive profiles leave it unused so strong encodes can compete on merit without hard guards.');
-INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Source: Block Remux-Raw Disk', 'Blocking');
 INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('1080p: UHD BluRay Source Bonus', '(?i)^(?=.*\b1080p\b)(?=.*\b(?:uhd[ ._-]?blu[ ._-]?ray|uhd[ ._-]?bluray)\b)(?!.*\b(?:2160p|4k)\b).*$', 'Small positive score for 1080p encodes sourced from UHD BluRay. This replaces the old accidental 4K bonus on 1080p UHD-source releases, so they get credit for the cleaner source without being treated as true 4K.');
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('1080p: UHD BluRay Source Bonus', 'Scoring');
 INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('1080p: BluRay Preferred', '(?i)^(?=.*\b1080p\b)(?!.*\b(?:2160p|4k)\b)(?=.*\b(?:blu[ ._-]?ray|bluray)\b).*$', '1080p-only source bonus for BluRay releases. This keeps 1080p BluRay preference separate from the true 4K UHD BluRay preference.');
@@ -44,7 +39,7 @@ INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_nam
 INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('4K: UHD BluRay Preferred', '(?i)^(?=.*\b(?:2160p|4k)\b)(?=.*\b(?:uhd[ ._-]?blu[ ._-]?ray|uhd[ ._-]?bluray|blu[ ._-]?ray|bluray)\b).*$', 'Rewards 4K UHD BluRay or 4K BluRay source tags. Used to prefer cleaner 4K disc-sourced encodes when the file still fits the space-balanced rules.');
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('4K: UHD BluRay Preferred', 'HDR / 4K');
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('4K: UHD BluRay Preferred', 'Scoring');
-INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('4K: WEB-DL Preferred', '(?i)^(?=.*\b(?:2160p|4k)\b)(?=.*\b(?:web[ ._-]?dl|webdl)\b).*$', 'Rewards 4K WEB-DL source tags. Useful for compact, clean 2160p HDR releases that are often smaller than BluRay-derived encodes.');
+INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('4K: WEB-DL Preferred', '(?i)^(?=.*\b(?:2160p|4k)\b)(?=.*\b(?:web[ ._-]?dl|webdl)\b).*$', 'Rewards 4K WEB-DL source tags. Useful for efficient, clean 2160p HDR releases that are often smaller than BluRay-derived encodes.');
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('4K: WEB-DL Preferred', 'HDR / 4K');
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('4K: WEB-DL Preferred', 'Scoring');
 INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Movie Source: Block WEBRip', '(?i)\b(?:web[ ._-]?rip|webrip)\b', 'Legacy generic WEBRip detector kept for cleanup and optional stricter profiles. Current curated profiles use resolution-specific WEBRip source formats instead, so 1080p/720p/576p/480p/4K handling stays separate.');
@@ -61,11 +56,6 @@ INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_nam
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('4K Source: Block BDRip', 'Blocking');
 INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Release: Proper-Repack-Rerip', '(?i)\b(?:PROPER|REPACK|RERIP)(?:[ ._-]?[23])?\b|\bREAL(?:[ ._-]?REAL)?[ ._-]?(?:PROPER|REPACK)\b', 'Modest release-fix bonus for PROPER, REPACK, RERIP, REAL.PROPER, and higher-version proper/repack tags. It is intentionally sized to fix same-tier releases without overpowering BluRay/source/HDR/audio scoring.');
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Release: Proper-Repack-Rerip', 'Release Fixes');
-INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('Source: Remux Preferred', 'Positive Remux source preference used by feature-rich profiles without making Remux an automatic quality-tier winner.', 0);
-INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Source: Remux Preferred', 'Remux');
-INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Source: Remux Preferred', 'Scoring');
-INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Source: Remux Preferred', 'Remux source', 'release_title', 'all', 0, 1);
-INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('Source: Remux Preferred', 'Remux source', 'Source: Remux Preferred');
 INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('1080p: UHD BluRay Source Bonus', 'Small positive score for 1080p encodes sourced from UHD BluRay. This replaces the old accidental 4K bonus on 1080p UHD-source releases, so they get credit for the cleaner source without being treated as true 4K.', 0);
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('1080p: UHD BluRay Source Bonus', 'Scoring');
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('1080p: UHD BluRay Source Bonus', '1080p: UHD BluRay Source Bonus', 'release_title', 'all', 0, 1);
@@ -139,7 +129,7 @@ INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES 
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('4K: UHD BluRay Preferred', 'Scoring');
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('4K: UHD BluRay Preferred', '4K: UHD BluRay Preferred', 'release_title', 'all', 0, 1);
 INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('4K: UHD BluRay Preferred', '4K: UHD BluRay Preferred', '4K: UHD BluRay Preferred');
-INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('4K: WEB-DL Preferred', 'Rewards 4K WEB-DL source tags. Useful for compact, clean 2160p HDR releases that are often smaller than BluRay-derived encodes.', 0);
+INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('4K: WEB-DL Preferred', 'Rewards 4K WEB-DL source tags. Useful for efficient, clean 2160p HDR releases that are often smaller than BluRay-derived encodes.', 0);
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('4K: WEB-DL Preferred', 'HDR / 4K');
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('4K: WEB-DL Preferred', 'Scoring');
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('4K: WEB-DL Preferred', '4K: WEB-DL Preferred', 'release_title', 'all', 0, 1);
@@ -154,10 +144,6 @@ INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES 
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('4K Source: Block BDRip', 'Blocking');
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('4K Source: Block BDRip', '4K Source: Block BDRip', 'release_title', 'all', 0, 1);
 INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('4K Source: Block BDRip', '4K Source: Block BDRip', '4K Source: Block BDRip');
-INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('Source: Block Remux-Raw Disk', 'Optional strict detector for remux, BD remux, BR-DISK, BD-DISK, and raw-HD style releases. Additive movie profiles can omit it entirely, while stricter profiles can still use it to keep oversized source-grade releases out.', 0);
-INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Source: Block Remux-Raw Disk', 'Blocking');
-INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Source: Block Remux-Raw Disk', 'Source: Block Remux-Raw Disk', 'release_title', 'all', 0, 1);
-INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('Source: Block Remux-Raw Disk', 'Source: Block Remux-Raw Disk', 'Source: Block Remux-Raw Disk');
 INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('Release: Proper-Repack-Rerip', 'Modest release-fix bonus for PROPER, REPACK, RERIP, REAL.PROPER, and higher-version proper/repack tags. It is intentionally sized to fix same-tier releases without overpowering BluRay/source/HDR/audio scoring.', 0);
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Release: Proper-Repack-Rerip', 'Release Fixes');
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Release: Proper-Repack-Rerip', 'Release: Proper-Repack-Rerip', 'release_title', 'all', 0, 1);

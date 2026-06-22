@@ -1,4 +1,4 @@
-﻿-- Alex_C.T Media Server modular Profilarr v2 PCD operations.
+﻿-- Alex_C.T Media Server modular Profilarr v4 PCD operations.
 -- 01: Core tags, languages, and quality names.
 -- Import first.
 --
@@ -24,11 +24,6 @@ INSERT OR IGNORE INTO tags (name) VALUES ('1080p');
 INSERT OR IGNORE INTO tags (name) VALUES ('4K');
 INSERT OR IGNORE INTO tags (name) VALUES ('Catalog');
 INSERT OR IGNORE INTO tags (name) VALUES ('Size Guards');
-INSERT OR IGNORE INTO tags (name) VALUES ('Size Bands');
-INSERT OR IGNORE INTO tags (name) VALUES ('Movie Size Guards');
-INSERT OR IGNORE INTO tags (name) VALUES ('Compact');
-INSERT OR IGNORE INTO tags (name) VALUES ('Premium');
-INSERT OR IGNORE INTO tags (name) VALUES ('Remux');
 INSERT OR IGNORE INTO tags (name) VALUES ('720p');
 INSERT OR IGNORE INTO tags (name) VALUES ('Archive');
 INSERT OR IGNORE INTO tags (name) VALUES ('Editions');

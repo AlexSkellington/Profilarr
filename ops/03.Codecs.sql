@@ -1,8 +1,8 @@
-﻿-- Alex_C.T modular Profilarr v2 PCD operations.
+﻿-- Alex_C.T modular Profilarr v4 PCD operations.
 -- 03: Video codec regexes, custom formats, conditions, and bindings.
 -- Requires 01.
 
-INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Codec: AV1 Preferred', '(?i)\bav1\b', 'High-efficiency alternate codec signal. AV1 stays available for compact releases, but movie profiles can score it slightly below x265/HEVC when compatibility and consistency matter more than theoretical efficiency.');
+INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Codec: AV1 Preferred', '(?i)\bav1\b', 'High-efficiency alternate codec signal. AV1 stays available for efficient releases, but movie profiles can score it slightly below x265/HEVC when compatibility and consistency matter more than theoretical efficiency.');
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Codec: AV1 Preferred', 'Codec');
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Codec: AV1 Preferred', 'Scoring');
 INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Codec: VVC-x266 Future', '(?i)\b(?:vvc|h[ ._-]?266|x[ ._-]?266)\b', 'Third-place codec preference. H.266, x266, and VVC are recognized, but they stay below x265 and AV1 in every managed profile.');
@@ -14,7 +14,7 @@ INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES (
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Codec: x264-H264 Fallback or Penalty', 'Codec');
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Codec: x264-H264 Fallback or Penalty', 'Blocking');
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Codec: x264-H264 Fallback or Penalty', 'Scoring');
-INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('Codec: AV1 Preferred', 'High-efficiency alternate codec signal. AV1 stays available for compact releases, but movie profiles can score it slightly below x265/HEVC when compatibility and consistency matter more than theoretical efficiency.', 0);
+INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('Codec: AV1 Preferred', 'High-efficiency alternate codec signal. AV1 stays available for efficient releases, but movie profiles can score it slightly below x265/HEVC when compatibility and consistency matter more than theoretical efficiency.', 0);
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Codec: AV1 Preferred', 'Codec');
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Codec: AV1 Preferred', 'Scoring');
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Codec: AV1 Preferred', 'Codec: AV1 Preferred', 'release_title', 'all', 0, 1);

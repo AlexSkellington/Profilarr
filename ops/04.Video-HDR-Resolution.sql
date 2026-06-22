@@ -1,12 +1,7 @@
-﻿-- Alex_C.T modular Profilarr v2 PCD operations.
+﻿-- Alex_C.T modular Profilarr v4 PCD operations.
 -- 04: Video, HDR, and resolution regexes, custom formats, conditions, and bindings.
 -- Requires 01.
 
-INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Video: 2160p Resolution Bonus', '(?i)\b(?:2160p|4k)\b', 'Modest 2160p preference used inside cross-resolution quality groups. Rich 1080p releases can still beat weak 4K releases, while similarly featured 4K releases win the tie. UHD-source 1080p encodes are intentionally excluded.');
-INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Video: 2160p Resolution Bonus', 'HDR / 4K');
-INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Video: 2160p Resolution Bonus', 'Scoring');
-INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Video: 1080p Preference', '(?i)^(?=.*\b1080p\b)(?!.*\b(?:2160p|4k)\b).*$', 'Matches true 1080p releases for the Best Available profiles. Its strong preference keeps 1080p as the normal winner while still allowing exceptional 4K feature stacks to prevail.');
-INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Video: 1080p Preference', 'Scoring');
 INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Video: 10-bit SDR / Main 10 Fallback', '(?i)^(?=.*\b(?:x265|h[ ._-]?265|hevc|av1|x266|h[ ._-]?266|vvc)\b)(?=.*\b(?:10[ ._-]?bit|10b|main[ ._-]?10|yuv420p10le)\b)(?!.*(?:\bhdr\b|\bhdr10\b|\bhdr10plus\b|\bhdr10\+|\bdovi\b|\bdv\b|dolby[ ._-]?vision)).*$', 'Fallback visual-quality bonus for efficient-codec releases that explicitly advertise 10-bit/Main 10 but do not advertise HDR, HDR10, HDR10+, DoVi, DV, or Dolby Vision. This lets 10-bit SDR sit above plain 8-bit HEVC/x265 while staying below true HDR/Dolby Vision.');
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Video: 10-bit SDR / Main 10 Fallback', 'Codec');
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Video: 10-bit SDR / Main 10 Fallback', 'HDR / 4K');
@@ -37,15 +32,6 @@ INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_nam
 INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('4K: Block x264-H264', '(?i)^(?=.*\b(?:2160p|4k)\b)(?=.*\b(?:avc|[xh][ ._-]?264)\b).*$', 'Optional strict detector for 4K or 2160p releases encoded as x264, H.264, or AVC. The default additive profiles leave it unattached and instead let HEVC, AV1, or VVC win through positive bonuses.');
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('4K: Block x264-H264', 'HDR / 4K');
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('4K: Block x264-H264', 'Blocking');
-INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('Video: 2160p Resolution Bonus', 'Modest 2160p preference for feature-first profiles that compare 1080p and 4K releases inside one quality group.', 0);
-INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Video: 2160p Resolution Bonus', 'HDR / 4K');
-INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Video: 2160p Resolution Bonus', 'Scoring');
-INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Video: 2160p Resolution Bonus', '2160p marker', 'release_title', 'all', 0, 1);
-INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('Video: 2160p Resolution Bonus', '2160p marker', 'Video: 2160p Resolution Bonus');
-INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('Video: 1080p Preference', 'Strong 1080p preference used only by Best Available profiles. Ordinary 4K HDR does not overturn it, but exceptional Dolby Vision/HDR or premium-audio feature stacks can.', 0);
-INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Video: 1080p Preference', 'Scoring');
-INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Video: 1080p Preference', '1080p marker', 'release_title', 'all', 0, 1);
-INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('Video: 1080p Preference', '1080p marker', 'Video: 1080p Preference');
 INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('Video: 10-bit SDR / Main 10 Fallback', 'Soft fallback score for explicit 10-bit SDR / HEVC Main 10 style releases when HDR/Dolby Vision is not advertised. This helps profiles prefer 10-bit by itself after true HDR/DV options, without allowing weak sources to beat the BluRay target ladder.', 0);
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Video: 10-bit SDR / Main 10 Fallback', 'Codec');
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Video: 10-bit SDR / Main 10 Fallback', 'HDR / 4K');

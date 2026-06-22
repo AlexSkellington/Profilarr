@@ -1,4 +1,4 @@
-﻿-- Alex_C.T modular Profilarr v2 PCD operations.
+﻿-- Alex_C.T modular Profilarr v4 PCD operations.
 -- 07: Movie edition regexes, custom formats, conditions, and bindings.
 -- Requires 01.
 

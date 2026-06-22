@@ -1,4 +1,4 @@
--- Alex_C.T Media Server modular Profilarr v2 PCD operations.
+-- Alex_C.T Media Server modular Profilarr v4 PCD operations.
 -- 10: Naming settings, media settings, and quality definitions.
 -- Requires 01.Core-Tags-Languages-Qualities.sql.
 

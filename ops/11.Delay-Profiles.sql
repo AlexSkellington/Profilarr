@@ -1,4 +1,4 @@
-﻿-- Alex_C.T Media Server modular Profilarr v2 PCD operations.
+﻿-- Alex_C.T Media Server modular Profilarr v4 PCD operations.
 -- 11: Usenet-first delay profile.
 -- Requires no previous ops files, but import after the core/profile ops for readability.
 

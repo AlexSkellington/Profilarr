@@ -1,9 +1,8 @@
 # Alejandro Feature-Rich Profilarr PCD
 
 A centralized Profilarr database for Radarr and Sonarr. It favors technically
-rich releases with strong HDR/Dolby Vision, surround or lossless audio, trusted
-sources, and high runtime-aware quality targets without forcing resolution to
-win every comparison.
+rich encoded releases with strong HDR/Dolby Vision, surround or lossless audio,
+trusted sources, and high runtime-aware quality targets.
 
 ## Import order
 
@@ -35,56 +34,48 @@ tuning does not require chasing definitions across multiple files.
 - `01`: shared tags, languages, and canonical quality names.
 - `02`: English/Spanish language and subtitle matching.
 - `03`: HEVC, AV1, VVC, and x264 codec matching.
-- `04`: 10-bit video, HDR10/HDR10+, Dolby Vision, and resolution preference.
+- `04`: 10-bit video, HDR10/HDR10+, Dolby Vision, and video safeguards.
 - `05`: audio codecs, 5.1/6.1/7.1, Atmos, and lossless audio.
-- `06`: Remux, BluRay, WEB-DL, weaker source detectors, and release fixes.
+- `06`: BluRay, WEB-DL, weaker source detectors, and release fixes.
 - `07`: IMAX, cuts, restorations, labels, and other movie editions.
-- `08`: the four Radarr movie profiles and their shared score matrix.
-- `09`: the four Sonarr series profiles and their shared score matrix.
+- `08`: the three Radarr movie profiles and their shared score matrix.
+- `09`: the three Sonarr series profiles and their shared score matrix.
 - `10`: naming, media settings, and runtime-aware quality definitions.
 - `11`: the shared Usenet-first delay profile.
-- `12`: optional movie size bands and series tiny-release helpers.
+- `12`: optional series tiny-release helpers.
 
 ## Movie profiles
 
-- `Alex_C.T - Best Available Movies`: default. Compares BluRay and WEB-DL
-  across 1080p and 2160p with a strong 2000-point preference for equivalent
-  1080p sources; it does not accept Remux.
-- `Alex_C.T - Best 1080p Movies`: the same feature scoring, constrained to
-  1080p Remux, BluRay, and WEB-DL.
-- `Alex_C.T - Best 4K Movies`: the same feature scoring, constrained to 2160p
-  Remux, BluRay, and WEB-DL.
+- `Alex_C.T - Best 1080p Movies`: default. Compares 1080p BluRay and WEB-DL
+  inside one feature-first quality group.
+- `Alex_C.T - Best 4K Movies`: compares 2160p BluRay and WEB-DL inside the same
+  feature-first decision model.
 - `Alex_C.T - Catalog 480p-1080p Movies`: relaxed DVD-through-1080p ladder for
   old or scarce titles.
 
 ## Series profiles
 
-- `Alex_C.T - Best Available Series`: default cross-resolution BluRay/WEB-DL
-  feature group with the same strong 1080p preference; it does not accept Remux.
-- `Alex_C.T - Best 1080p Series`: strict 1080p feature group.
-- `Alex_C.T - Best 4K Series`: strict 2160p feature group.
+- `Alex_C.T - Best 1080p Series`: default 1080p BluRay/WEB-DL feature group.
+- `Alex_C.T - Best 4K Series`: strict 2160p BluRay/WEB-DL feature group.
 - `Alex_C.T - Catalog 480p-1080p Series`: relaxed archive/catalog ladder.
 
-Only these eight movie and series profiles are created. Legacy profile names
-are intentionally not retained as aliases; this is a clean profile model, not
-a compatibility layer.
+Only these six movie and series profiles are created. No compatibility aliases
+or retired profile names are retained.
 
 ## Selection philosophy
 
 Radarr and Sonarr normally compare quality position before custom-format score.
-The three primary profiles therefore place their comparable qualities inside a
-single quality group. This lets feature scoring choose between a rich 1080p
-release and a weak 4K release instead of granting 4K an automatic win.
+Each strict profile therefore places BluRay and WEB-DL for its resolution in a
+single quality group. Source is a meaningful factor, but HDR, audio, codec,
+language, and edition features can still identify the better overall file.
+Catalog remains an ordered ladder because availability matters most there.
 
 Scoring priorities are:
 
 1. Dolby Vision with HDR fallback, HDR10+, and HDR10.
 2. Atmos, lossless audio, 7.1, 6.1, and strong 5.1 audio.
-3. UHD BluRay, BluRay, and clean WEB-DL source signals; Remux is added only to
-   the resolution-specific 1080p and 4K profiles.
-4. A 2000-point 1080p preference: 4K must supply an exceptional HDR, Dolby
-   Vision, audio, or combined feature advantage to win.
-5. Language, subtitles, codecs, release fixes, and movie editions as refiners.
+3. UHD BluRay, BluRay, and clean WEB-DL source signals.
+4. Language, subtitles, codecs, release fixes, and movie editions as refiners.
 
 The primary profiles use a minimum custom-format score of `0`. A usable release
 can download first and continue upgrading toward a feature-rich keeper score of
@@ -97,10 +88,9 @@ Quality definitions in `10.Media-Management.sql` are the main runtime-aware
 MiB-per-minute controls. Their preferred sizes also provide Radarr's final size
 tie-breaker after quality-group and custom-format comparisons.
 
-The total-size helpers in `12.Optional-Size-Guards.sql` are intentionally not
-attached to any managed profile. They remain available for manual experiments,
-but fixed file-size bands distort short and long movies and should not decide
-the default profile.
+The tiny-episode helpers in `12.Optional-Size-Guards.sql` are intentionally not
+attached to any managed profile. Runtime-aware definitions remain the source of
+truth for normal file sizing.
 
 ## Metadata limitation
 
@@ -109,29 +99,16 @@ imports and naming, but release-time codec, HDR, and audio decisions still rely
 on advertised title markers. Runtime-aware quality definitions and source tags
 are therefore strong proxies, not proof of the final stream bitrate.
 
-## Migration from 1.x
+## Clean rebuild
 
-Version 2.0 replaces the Compact/Premium/Remux profile grid and reorganizes the
-custom-format modules. Remove these superseded files from `ops/`:
-
-```text
-ops/02.Regular-Expressions-Language-Subtitles.sql
-ops/03.Regular-Expressions-Codecs-HDR-Audio.sql
-ops/04.Regular-Expressions-Resolution-Source-Editions.sql
-ops/05.Custom-Formats-Language-Subtitles.sql
-ops/06.Custom-Formats-Codec-HDR-Audio-Resolution.sql
-ops/07.Custom-Formats-Source-Editions-Releases.sql
-ops/12.Series-Size-Guards.sql
-```
-
-Version 3.0 requires a clean Profilarr migration because an existing database
-can retain mappings to profile names that no longer exist:
+Version 4.0 is a clean rebuild and should not be layered over an existing
+Profilarr database with stale mappings:
 
 1. Push this complete layout to GitHub.
 2. Unlink or remove the old `Alex_C.T` database (including database `12`) in Profilarr.
 3. Link the repository again and rebuild it from GitHub.
 4. Sync the desired profiles and settings to Radarr and Sonarr.
-5. Assign `Best Available` as the default and use the targeted or Catalog
-   profiles only where the title needs that policy.
+5. Assign `Best 1080p` as the default and select `Best 4K` or Catalog only where
+   that policy is intentional.
 
 Run `validate_manifest.py` after every structural or profile change.
