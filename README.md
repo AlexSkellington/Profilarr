@@ -95,12 +95,20 @@ Quality definitions in `10.Media-Management.sql` are the main runtime-aware
 MiB-per-minute controls. Their preferred sizes also provide Radarr's final size
 tie-breaker after quality and custom-format comparisons.
 
-File `12.Optional-Size-Guards.sql` adds cumulative Radarr movie bonuses as a
+File `12.Optional-Size-Guards.sql` adds cumulative movie bonuses as a
 total-size proxy for bitrate. Best 1080p Movies gains `+100` at 8, 12, and 18
 GiB; Best 4K Movies gains `+100` at 14, 22, and 32 GiB. The maximum is `+300`,
 so size breaks close comparisons without overpowering major A/V scores. These
 tiers cannot account for runtime, so longer movies may receive more credit than
-their true bitrate warrants. Tiny-episode helpers remain unattached.
+their true bitrate warrants. The size specs are defined with universal Arr
+conditions for more reliable deployment, but they remain attached only to the
+movie profiles. Tiny-episode helpers remain unattached.
+
+The strict `Language: Block Other Languages` helper is also intentionally built
+from one explicit foreign-language marker plus negated English, Spanish, and
+multi-audio checks instead of one giant regex. That keeps mixed-language
+releases allowed while making the custom format easier for Arr and Profilarr to
+sync consistently.
 
 ## Metadata limitation
 

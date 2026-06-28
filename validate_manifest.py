@@ -174,8 +174,8 @@ for key in ["name", "version", "description", "arr_types", "dependencies", "prof
     if key not in data:
         fail(f"pcd.json missing required key: {key}")
 
-if data.get("version") != "4.2.1":
-    fail("pcd.json version should be 4.2.1 for the mixed-language-safe strict profile update")
+if data.get("version") != "4.2.2":
+    fail("pcd.json version should be 4.2.2 for the deploy-safe language blocker and universal size-spec sync update")
 if sorted(data.get("arr_types", [])) != ["radarr", "sonarr"]:
     fail("pcd.json arr_types should be exactly ['radarr', 'sonarr']")
 if data.get("profilarr", {}).get("minimum_version") != "2.0.0":
@@ -476,14 +476,41 @@ if not errors:
             f"actual={actual_size_thresholds}"
         )
 
-    non_radarr_size_conditions = list(
+    non_universal_size_conditions = list(
         connection.execute(
             "SELECT custom_format_name, name, arr_type FROM custom_format_conditions "
-            "WHERE custom_format_name LIKE 'Size Bonus:%' AND arr_type != 'radarr'"
+            "WHERE custom_format_name LIKE 'Size Bonus:%' AND arr_type != 'all'"
         )
     )
-    if non_radarr_size_conditions:
-        fail(f"Movie size bonuses must remain Radarr-only: {non_radarr_size_conditions}")
+    if non_universal_size_conditions:
+        fail(f"Movie size bonus conditions should use arr_type=all for more reliable sync: {non_universal_size_conditions}")
+
+    non_universal_size_bindings = list(
+        connection.execute(
+            "SELECT quality_profile_name, custom_format_name, arr_type FROM quality_profile_custom_formats "
+            "WHERE custom_format_name LIKE 'Size Bonus:%' AND arr_type != 'all'"
+        )
+    )
+    if non_universal_size_bindings:
+        fail(f"Movie size bonus bindings should use arr_type=all for more reliable sync: {non_universal_size_bindings}")
+
+    blocker_conditions = list(
+        connection.execute(
+            "SELECT name, negate, required FROM custom_format_conditions "
+            "WHERE custom_format_name = 'Language: Block Other Languages' ORDER BY name"
+        )
+    )
+    expected_blocker_conditions = [
+        ("Language: No English Marker", 1, 1),
+        ("Language: No Multi Marker", 1, 1),
+        ("Language: No Spanish Marker", 1, 1),
+        ("Language: Other-Language Audio/Sub Marker", 0, 1),
+    ]
+    if blocker_conditions != expected_blocker_conditions:
+        fail(
+            "Language: Block Other Languages should use the four-condition deploy-safe structure: "
+            f"expected={expected_blocker_conditions}, actual={blocker_conditions}"
+        )
 
     remux_members = list(
         connection.execute(
