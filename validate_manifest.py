@@ -60,6 +60,52 @@ SERIES_PROFILES = {
     "Alex_C.T - Catalog 480p-1080p Series",
 }
 EXPECTED_PROFILES = MOVIE_PROFILES | SERIES_PROFILES
+STRICT_PROFILES = {
+    "Alex_C.T - Best 1080p Movies",
+    "Alex_C.T - Best 4K Movies",
+    "Alex_C.T - Best 1080p Series",
+    "Alex_C.T - Best 4K Series",
+}
+REDUNDANT_SOURCE_SCORE_NAMES = {
+    "4K: UHD BluRay Preferred",
+    "4K: WEB-DL Preferred",
+    "1080p: BluRay Preferred",
+    "1080p: WEB-DL Preferred",
+}
+EXPECTED_UPGRADE_SCORE_INCREMENT = {profile: 1 for profile in EXPECTED_PROFILES}
+EXPECTED_NEGATIVE_SCORES = {
+    "Alex_C.T - Best 1080p Movies": {
+        "Language: Block Other Languages": -50000,
+        "Subtitles: Block Hardcoded-Burned-In": -50000,
+    },
+    "Alex_C.T - Best 4K Movies": {
+        "Language: Block Other Languages": -50000,
+        "Subtitles: Block Hardcoded-Burned-In": -50000,
+        "4K Gate: Block Missing HDR": -50000,
+        "4K: Block x264-H264": -50000,
+        "4K Audio: Block AAC-Only": -50000,
+        "4K Gate: Block Missing 5.1+ Surround": -50000,
+        "4K Source: Block BDRip": -50000,
+    },
+    "Alex_C.T - Best 1080p Series": {
+        "Language: Block Other Languages": -50000,
+        "Subtitles: Block Hardcoded-Burned-In": -50000,
+    },
+    "Alex_C.T - Best 4K Series": {
+        "Language: Block Other Languages": -50000,
+        "Subtitles: Block Hardcoded-Burned-In": -50000,
+        "4K Gate: Block Missing HDR": -50000,
+        "4K: Block x264-H264": -50000,
+        "4K Audio: Block AAC-Only": -50000,
+        "4K Gate: Block Missing 5.1+ Surround": -50000,
+        "4K Source: Block BDRip": -50000,
+    },
+    "Alex_C.T - Catalog 480p-1080p Movies": {},
+    "Alex_C.T - Catalog 480p-1080p Series": {},
+}
+STRICT_BLOCKER_NAMES = {
+    name for scores in EXPECTED_NEGATIVE_SCORES.values() for name in scores
+}
 
 EXPECTED_QUALITY_ORDER = {
     "Alex_C.T - Best 1080p Movies": ["Bluray-1080p", "WEBDL-1080p"],
@@ -128,8 +174,8 @@ for key in ["name", "version", "description", "arr_types", "dependencies", "prof
     if key not in data:
         fail(f"pcd.json missing required key: {key}")
 
-if data.get("version") != "4.1.1":
-    fail("pcd.json version should be 4.1.1 for cumulative movie size bonuses")
+if data.get("version") != "4.2.1":
+    fail("pcd.json version should be 4.2.1 for the mixed-language-safe strict profile update")
 if sorted(data.get("arr_types", [])) != ["radarr", "sonarr"]:
     fail("pcd.json arr_types should be exactly ['radarr', 'sonarr']")
 if data.get("profilarr", {}).get("minimum_version") != "2.0.0":
@@ -301,11 +347,16 @@ if not errors:
 
     for profile in EXPECTED_PROFILES:
         row = connection.execute(
-            "SELECT minimum_custom_format_score, upgrade_until_score FROM quality_profiles WHERE name = ?",
+            "SELECT minimum_custom_format_score, upgrade_until_score, upgrade_score_increment FROM quality_profiles WHERE name = ?",
             (profile,),
         ).fetchone()
         if row is None or int(row[0]) != 0 or int(row[1]) != 10000:
             fail(f"{profile} should use minimum score 0 and keeper score 10000")
+        if row is None or int(row[2]) != EXPECTED_UPGRADE_SCORE_INCREMENT[profile]:
+            fail(
+                f"{profile} should use upgrade score increment "
+                f"{EXPECTED_UPGRADE_SCORE_INCREMENT[profile]}"
+            )
 
     for profile, expected_order in EXPECTED_QUALITY_ORDER.items():
         rows = list(
@@ -336,17 +387,24 @@ if not errors:
     def without_size_bonus(scores):
         return {name: score for name, score in scores.items() if not name.startswith("Size Bonus:")}
 
+    def additive_matrix(scores):
+        return {
+            name: score
+            for name, score in scores.items()
+            if not name.startswith("Size Bonus:") and name not in STRICT_BLOCKER_NAMES
+        }
+
     movie_scores = score_map("Alex_C.T - Best 1080p Movies")
-    movie_base_scores = without_size_bonus(movie_scores)
+    movie_base_scores = additive_matrix(movie_scores)
     series_scores = score_map("Alex_C.T - Best 1080p Series")
-    if without_size_bonus(score_map("Alex_C.T - Best 4K Movies")) != movie_base_scores:
+    if additive_matrix(score_map("Alex_C.T - Best 4K Movies")) != movie_base_scores:
         fail("Alex_C.T - Best 4K Movies should inherit the canonical movie score matrix before size bonuses")
-    if score_map("Alex_C.T - Best 4K Series") != series_scores:
+    if additive_matrix(score_map("Alex_C.T - Best 4K Series")) != additive_matrix(series_scores):
         fail("Alex_C.T - Best 4K Series should inherit the canonical series score matrix")
 
     for catalog, canonical in [
         ("Alex_C.T - Catalog 480p-1080p Movies", movie_base_scores),
-        ("Alex_C.T - Catalog 480p-1080p Series", series_scores),
+        ("Alex_C.T - Catalog 480p-1080p Series", additive_matrix(series_scores)),
     ]:
         catalog_scores = score_map(catalog)
         if any(catalog_scores.get(name) != score for name, score in canonical.items()):
@@ -358,16 +416,24 @@ if not errors:
     ]:
         if "1080p: UHD BluRay Source Bonus" in scores:
             fail(f"{profile} should keep source scoring centralized without a stacking UHD-source bonus")
-        if scores.get("4K: UHD BluRay Preferred") != scores.get("1080p: BluRay Preferred"):
-            fail(f"{profile} should score encoded BluRay sources consistently across resolutions")
-        if scores.get("4K: WEB-DL Preferred") != scores.get("1080p: WEB-DL Preferred"):
-            fail(f"{profile} should score WEB-DL sources consistently across resolutions")
-        if scores.get("1080p: BluRay Preferred", 0) <= scores.get("1080p: WEB-DL Preferred", 0):
-            fail(f"{profile} should prefer BluRay source while allowing features to influence the winner")
         if scores.get("Audio: Atmos Bonus", 0) <= scores.get("Codec: HEVC-x265 Preferred", 0):
             fail(f"{profile} should value Atmos above a codec label")
-        if scores.get("Audio: 7.1 Bonus", 0) <= scores.get("Audio: 5.1 Surround Preferred", 0):
-            fail(f"{profile} should prefer 7.1 while retaining strong 5.1 credit")
+        if scores.get("Audio: 7.1 Bonus", 0) <= scores.get("Audio: 6.1 Bonus", 0):
+            fail(f"{profile} should prefer 7.1 over 6.1")
+        if scores.get("Audio: 6.1 Bonus", 0) <= scores.get("Audio: 5.1 Surround Preferred", 0):
+            fail(f"{profile} should prefer 6.1 over strong 5.1 credit")
+
+    for profile in EXPECTED_PROFILES:
+        scores = score_map(profile)
+        for name in REDUNDANT_SOURCE_SCORE_NAMES:
+            if name in scores:
+                fail(f"{profile} should not attach redundant strict source score: {name}")
+        actual_negative_scores = {name: score for name, score in scores.items() if score < 0}
+        if actual_negative_scores != EXPECTED_NEGATIVE_SCORES[profile]:
+            fail(
+                f"{profile} negative-score blockers differ: "
+                f"expected={EXPECTED_NEGATIVE_SCORES[profile]}, actual={actual_negative_scores}"
+            )
 
     expected_size_bonus_scores = {
         "Alex_C.T - Best 1080p Movies": {
@@ -432,12 +498,6 @@ if not errors:
     ]
     if remux_formats:
         fail(f"The clean rebuild should not define Remux custom formats: {remux_formats}")
-
-    negative_scores = list(
-        connection.execute("SELECT quality_profile_name, custom_format_name, score FROM quality_profile_custom_formats WHERE score < 0")
-    )
-    if negative_scores:
-        fail(f"Managed profiles should remain additive, found negative scores: {negative_scores}")
 
     attached_size_helpers = list(
         connection.execute(

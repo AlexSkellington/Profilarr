@@ -3,8 +3,9 @@
 -- Requires 01 through 07.
 --
 -- The strict profiles enable only the default BluRay and WEB-DL qualities for
--- their resolution. Catalog keeps an ordered,
--- permissive DVD-through-1080p fallback ladder. Remux is never enabled.
+-- their resolution, then hard-block a short list of clearly bad matches.
+-- Catalog keeps an ordered, permissive DVD-through-1080p fallback ladder.
+-- Remux is never enabled.
 
 -- Rebuild only the current managed movie profiles.
 DELETE FROM quality_profile_custom_formats WHERE quality_profile_name IN (
@@ -28,21 +29,21 @@ DELETE FROM quality_profiles WHERE name IN (
 -- Profile quality groups
 -------------------------------------------------------------------------------
 
-INSERT INTO quality_profiles (name, description, upgrades_allowed, minimum_custom_format_score, upgrade_until_score, upgrade_score_increment) VALUES ('Alex_C.T - Best 1080p Movies', 'Default 1080p movie profile containing BluRay and WEB-DL. Remux is not enabled.', 1, 0, 10000, 50);
+INSERT INTO quality_profiles (name, description, upgrades_allowed, minimum_custom_format_score, upgrade_until_score, upgrade_score_increment) VALUES ('Alex_C.T - Best 1080p Movies', 'Best-first 1080p movie profile containing BluRay and WEB-DL. Hardcoded subtitles are blocked. Remux is not enabled.', 1, 0, 10000, 1);
 INSERT INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Best 1080p Movies', 'Radarr');
 INSERT INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Best 1080p Movies', 'Movies');
 INSERT INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Best 1080p Movies', '1080p');
 INSERT INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Best 1080p Movies', 'Bluray-1080p', 1, 1, 1);
 INSERT INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Best 1080p Movies', 'WEBDL-1080p', 2, 1, 0);
 
-INSERT INTO quality_profiles (name, description, upgrades_allowed, minimum_custom_format_score, upgrade_until_score, upgrade_score_increment) VALUES ('Alex_C.T - Best 4K Movies', '4K movie profile containing 2160p BluRay and WEB-DL. Remux is not enabled.', 1, 0, 10000, 50);
+INSERT INTO quality_profiles (name, description, upgrades_allowed, minimum_custom_format_score, upgrade_until_score, upgrade_score_increment) VALUES ('Alex_C.T - Best 4K Movies', 'Best-first 4K movie profile containing 2160p BluRay and WEB-DL. Weak 4K metadata, AAC-only audio, hardcoded subtitles, and BDRip releases are blocked. Remux is not enabled.', 1, 0, 10000, 1);
 INSERT INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Best 4K Movies', 'Radarr');
 INSERT INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Best 4K Movies', 'Movies');
 INSERT INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Best 4K Movies', '4K');
 INSERT INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Best 4K Movies', 'Bluray-2160p', 1, 1, 1);
 INSERT INTO quality_profile_qualities (quality_profile_name, quality_name, position, enabled, upgrade_until) VALUES ('Alex_C.T - Best 4K Movies', 'WEBDL-2160p', 2, 1, 0);
 
-INSERT INTO quality_profiles (name, description, upgrades_allowed, minimum_custom_format_score, upgrade_until_score, upgrade_score_increment) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Permissive DVD-through-1080p movie ladder for older and scarce titles.', 1, 0, 10000, 50);
+INSERT INTO quality_profiles (name, description, upgrades_allowed, minimum_custom_format_score, upgrade_until_score, upgrade_score_increment) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Permissive DVD-through-1080p movie ladder for older and scarce titles.', 1, 0, 10000, 1);
 INSERT INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Radarr');
 INSERT INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Movies');
 INSERT INTO quality_profile_tags (quality_profile_name, tag_name) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', 'Catalog');
@@ -99,11 +100,7 @@ INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_
 INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best 1080p Movies', 'Audio: AAC Fallback Marker', 'all', 20);
 INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best 1080p Movies', 'Audio: Stereo-2.0 Fallback', 'all', 5);
 
--- Source and release-fix signals proxy bitrate and provenance without hard size gates.
-INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best 1080p Movies', '4K: UHD BluRay Preferred', 'all', 1000);
-INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best 1080p Movies', '4K: WEB-DL Preferred', 'all', 500);
-INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best 1080p Movies', '1080p: BluRay Preferred', 'all', 1000);
-INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best 1080p Movies', '1080p: WEB-DL Preferred', 'all', 500);
+-- Release fixes stay modest so they break ties without overpowering A/V wins.
 INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best 1080p Movies', 'Release: Proper-Repack-Rerip', 'all', 75);
 
 -- Editions are collector refiners, intentionally below technical A/V features.
@@ -136,6 +133,17 @@ FROM quality_profile_custom_formats WHERE quality_profile_name = 'Alex_C.T - Bes
 INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score)
 SELECT 'Alex_C.T - Catalog 480p-1080p Movies', custom_format_name, arr_type, score
 FROM quality_profile_custom_formats WHERE quality_profile_name = 'Alex_C.T - Best 1080p Movies';
+
+-- Strict-profile hard gates keep obvious bad matches out of the best-first lane.
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best 1080p Movies', 'Language: Block Other Languages', 'all', -50000);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best 1080p Movies', 'Subtitles: Block Hardcoded-Burned-In', 'all', -50000);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best 4K Movies', 'Language: Block Other Languages', 'all', -50000);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best 4K Movies', 'Subtitles: Block Hardcoded-Burned-In', 'all', -50000);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best 4K Movies', '4K Gate: Block Missing HDR', 'all', -50000);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best 4K Movies', '4K: Block x264-H264', 'all', -50000);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best 4K Movies', '4K Audio: Block AAC-Only', 'all', -50000);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best 4K Movies', '4K Gate: Block Missing 5.1+ Surround', 'all', -50000);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best 4K Movies', '4K Source: Block BDRip', 'all', -50000);
 
 -- Catalog-only lower-resolution source refiners.
 INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Catalog 480p-1080p Movies', '1080p: WEBRip Source', 'all', 100);

@@ -2,7 +2,8 @@
 
 A centralized Profilarr database for Radarr and Sonarr. It favors technically
 rich encoded releases with strong HDR/Dolby Vision, surround or lossless audio,
-trusted sources, and high runtime-aware quality targets.
+trusted sources, and high runtime-aware quality targets, while strict profiles
+hard-block obvious bad fits before the first grab.
 
 ## Import order
 
@@ -64,21 +65,29 @@ or retired profile names are retained.
 
 Radarr and Sonarr compare quality position before custom-format score. Each
 strict profile checks BluRay first and WEB-DL second using the default qualities,
-without creating custom groups. Custom-format scores rank competing releases
-inside each checked quality. Catalog checks its fallback qualities individually
-in descending order because availability matters most there.
+without creating custom groups. A short list of negative custom-format blockers
+rejects clearly bad strict-profile matches before additive scoring matters.
+Accepted releases are then ranked by positive score inside each checked
+quality. Catalog stays permissive and checks its fallback qualities
+individually in descending order because availability matters most there.
 
 Scoring priorities are:
 
-1. Dolby Vision with HDR fallback, HDR10+, and HDR10.
-2. Atmos, lossless audio, 7.1, 6.1, and strong 5.1 audio.
-3. UHD BluRay, BluRay, and clean WEB-DL source signals.
+1. Strict-profile hard blockers for language-only wrong-language tags, hardcoded subtitles,
+   and weak 4K metadata.
+2. Dolby Vision with HDR fallback, HDR10+, and HDR10.
+3. Atmos, lossless audio, 7.1, 6.1, and strong 5.1 audio.
 4. Language, subtitles, codecs, release fixes, and movie editions as refiners.
+5. Catalog-only lower-resolution source refiners and modest movie size bonuses
+   break close archival ties.
 
 The primary profiles use a minimum custom-format score of `0`. A usable release
-can download first and continue upgrading toward a keeper score of
-`10000`. Codec labels receive modest scores because HEVC or AV1 alone does not
-prove that an encode is good.
+can download first only if it clears the strict blockers, then continue
+upgrading toward a keeper score of `10000`. Upgrade score increments are set to
+`1`, so any higher accepted score counts as a real improvement. Codec labels
+receive modest scores because HEVC or AV1 alone does not prove that an encode
+is good. Source order in the strict profiles comes from the quality ladder
+itself rather than extra BluRay-vs-WEB-DL score stacking.
 
 ## Bitrate and size
 

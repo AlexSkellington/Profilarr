@@ -1,7 +1,7 @@
 {
   "name": "Alex_C.T",
-  "version": "4.1.1",
-  "description": "Alejandro's clean six-profile media-server database for Radarr and Sonarr, using checked default qualities for 1080p, 4K, and Catalog profiles, plus concern-focused scoring and cumulative Radarr movie size bonuses.",
+  "version": "4.2.1",
+  "description": "Alejandro's clean six-profile media-server database for Radarr and Sonarr, using best-first strict 1080p and 4K profiles with hard gates, a relaxed Catalog ladder, concern-focused scoring, and cumulative Radarr movie size bonuses.",
   "arr_types": [
     "radarr",
     "sonarr"

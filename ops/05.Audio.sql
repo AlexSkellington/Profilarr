@@ -14,10 +14,10 @@ INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_nam
 INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Audio: EAC3-AC3 Preferred', '(?i)\b(?:eac3|e-ac-3|ddp|dd\+|ac3|ac-3|dolby[ ._-]?digital[ ._-]?plus|dolby[ ._-]?digital)\b', 'Preferred Dolby audio-format bonus for EAC3, DDP, DD+, AC3, and Dolby Digital tags. These formats stay highly compatible for shared media-server, eARC, and streaming-style playback.');
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Audio: EAC3-AC3 Preferred', 'Audio');
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Audio: EAC3-AC3 Preferred', 'Scoring');
-INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Audio: 6.1 Bonus', '(?i)\b(?:6[ ._-]?1|7ch|6\.1ch)\b', 'Secondary channel-layout bonus for 6.1 audio. It stays below the main 5.1 and Dolby-format preferences, but above 7.1 and stereo in the fallback ladder.');
+INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Audio: 6.1 Bonus', '(?i)\b(?:6[ ._-]?1|7ch|6\.1ch)\b', 'Secondary channel-layout bonus for 6.1 audio. It stays above the 5.1 compatibility target and stereo, but below 7.1 and premium Atmos/lossless paths in the current managed order.');
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Audio: 6.1 Bonus', 'Audio');
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Audio: 6.1 Bonus', 'Scoring');
-INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Audio: 7.1 Bonus', '(?i)\b(?:7[ ._-]?1|8ch|7\.1ch)\b', 'Smaller channel-layout bonus for 7.1 audio. It remains below the 5.1-first compatibility target and below 6.1 in the current managed fallback order.');
+INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Audio: 7.1 Bonus', '(?i)\b(?:7[ ._-]?1|8ch|7\.1ch)\b', 'Higher channel-layout bonus for 7.1 audio. It stays above 6.1 and 5.1 while still leaving room for Atmos and lossless tracks to win the strongest audio races.');
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Audio: 7.1 Bonus', 'Audio');
 INSERT OR REPLACE INTO regular_expression_tags (regular_expression_name, tag_name) VALUES ('Audio: 7.1 Bonus', 'Scoring');
 INSERT OR REPLACE INTO regular_expressions (name, pattern, description) VALUES ('Audio: AAC Fallback Marker', '(?i)\baac\b', 'Lowest acceptable audio-codec lane. AAC remains allowed so weak fallback releases can still download, but it sits behind EAC3, AC3, DDP, and Atmos once those exist.');
@@ -59,12 +59,12 @@ INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES 
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Audio: EAC3-AC3 Preferred', 'Scoring');
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Audio: EAC3-AC3 Preferred', 'Audio: EAC3-AC3 Preferred', 'release_title', 'all', 0, 1);
 INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('Audio: EAC3-AC3 Preferred', 'Audio: EAC3-AC3 Preferred', 'Audio: EAC3-AC3 Preferred');
-INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('Audio: 6.1 Bonus', 'Secondary channel-layout bonus for 6.1 audio. It stays below the main 5.1 and Dolby-format preferences, but above 7.1 and stereo in the fallback ladder.', 0);
+INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('Audio: 6.1 Bonus', 'Secondary channel-layout bonus for 6.1 audio. It stays above the 5.1 compatibility target and stereo, but below 7.1 and premium Atmos/lossless paths in the current managed order.', 0);
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Audio: 6.1 Bonus', 'Audio');
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Audio: 6.1 Bonus', 'Scoring');
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Audio: 6.1 Bonus', 'Audio: 6.1 Bonus', 'release_title', 'all', 0, 1);
 INSERT OR REPLACE INTO condition_patterns (custom_format_name, condition_name, regular_expression_name) VALUES ('Audio: 6.1 Bonus', 'Audio: 6.1 Bonus', 'Audio: 6.1 Bonus');
-INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('Audio: 7.1 Bonus', 'Smaller channel-layout bonus for 7.1 audio. It remains below the 5.1-first compatibility target and below 6.1 in the current managed fallback order.', 0);
+INSERT OR REPLACE INTO custom_formats (name, description, include_in_rename) VALUES ('Audio: 7.1 Bonus', 'Higher channel-layout bonus for 7.1 audio. It stays above 6.1 and 5.1 while still leaving room for Atmos and lossless tracks to win the strongest audio races.', 0);
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Audio: 7.1 Bonus', 'Audio');
 INSERT OR REPLACE INTO custom_format_tags (custom_format_name, tag_name) VALUES ('Audio: 7.1 Bonus', 'Scoring');
 INSERT OR REPLACE INTO custom_format_conditions (custom_format_name, name, type, arr_type, negate, required) VALUES ('Audio: 7.1 Bonus', 'Audio: 7.1 Bonus', 'release_title', 'all', 0, 1);
