@@ -101,8 +101,10 @@ GiB; Best 4K Movies gains `+100` at 14, 22, and 32 GiB. The maximum is `+300`,
 so size breaks close comparisons without overpowering major A/V scores. These
 tiers cannot account for runtime, so longer movies may receive more credit than
 their true bitrate warrants. The size specs are defined with universal Arr
-conditions for more reliable deployment, but they remain attached only to the
-movie profiles. Tiny-episode helpers remain unattached.
+conditions for more reliable deployment, and they now use explicit upper bounds
+instead of open-ended null maxima because Radarr's size specification is a
+bounded range. Tiny-episode helpers also use an explicit zero lower bound so
+their payload matches the same Arr size-spec rules, while remaining unattached.
 
 The strict `Language: Block Other Languages` helper is also intentionally built
 from one explicit foreign-language marker plus negated English, Spanish, and

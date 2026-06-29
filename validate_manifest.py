@@ -174,8 +174,8 @@ for key in ["name", "version", "description", "arr_types", "dependencies", "prof
     if key not in data:
         fail(f"pcd.json missing required key: {key}")
 
-if data.get("version") != "4.2.2":
-    fail("pcd.json version should be 4.2.2 for the deploy-safe language blocker and universal size-spec sync update")
+if data.get("version") != "4.2.3":
+    fail("pcd.json version should be 4.2.3 for the bounded size-spec deploy fix")
 if sorted(data.get("arr_types", [])) != ["radarr", "sonarr"]:
     fail("pcd.json arr_types should be exactly ['radarr', 'sonarr']")
 if data.get("profilarr", {}).get("minimum_version") != "2.0.0":
@@ -456,12 +456,12 @@ if not errors:
             fail(f"{profile} size bonuses differ: expected={expected}, actual={actual}")
 
     expected_size_thresholds = {
-        "Size Bonus: 1080p 8 GiB+": (8589934592, None),
-        "Size Bonus: 1080p 12 GiB+": (12884901888, None),
-        "Size Bonus: 1080p 18 GiB+": (19327352832, None),
-        "Size Bonus: 4K 14 GiB+": (15032385536, None),
-        "Size Bonus: 4K 22 GiB+": (23622320128, None),
-        "Size Bonus: 4K 32 GiB+": (34359738368, None),
+        "Size Bonus: 1080p 8 GiB+": (8589934592, 1099511627776),
+        "Size Bonus: 1080p 12 GiB+": (12884901888, 1099511627776),
+        "Size Bonus: 1080p 18 GiB+": (19327352832, 1099511627776),
+        "Size Bonus: 4K 14 GiB+": (15032385536, 1099511627776),
+        "Size Bonus: 4K 22 GiB+": (23622320128, 1099511627776),
+        "Size Bonus: 4K 32 GiB+": (34359738368, 1099511627776),
     }
     actual_size_thresholds = {
         row[0]: (int(row[1]), row[2])
@@ -474,6 +474,23 @@ if not errors:
         fail(
             f"Movie size-bonus thresholds differ: expected={expected_size_thresholds}, "
             f"actual={actual_size_thresholds}"
+        )
+
+    expected_size_guard_thresholds = {
+        "Size Guard: 1080p Episode Tiny Encode": (0, 314572800),
+        "Size Guard: 4K Episode Tiny Encode": (0, 838860800),
+    }
+    actual_size_guard_thresholds = {
+        row[0]: (int(row[1]), int(row[2]))
+        for row in connection.execute(
+            "SELECT custom_format_name, min_bytes, max_bytes FROM condition_sizes "
+            "WHERE custom_format_name LIKE 'Size Guard:%'"
+        )
+    }
+    if actual_size_guard_thresholds != expected_size_guard_thresholds:
+        fail(
+            f"Episode size-guard thresholds differ: expected={expected_size_guard_thresholds}, "
+            f"actual={actual_size_guard_thresholds}"
         )
 
     non_universal_size_conditions = list(
