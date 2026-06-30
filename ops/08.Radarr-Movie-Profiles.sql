@@ -75,10 +75,10 @@ INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_
 INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best 1080p Movies', 'Subtitles: Spanish Bonus', 'all', 50);
 INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best 1080p Movies', 'Subtitles: English Bonus', 'all', 25);
 
--- Codecs are tie-breakers; codec labels are not proof of encode quality.
-INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best 1080p Movies', 'Codec: HEVC-x265 Preferred', 'all', 400);
-INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best 1080p Movies', 'Codec: AV1 Preferred', 'all', 350);
-INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best 1080p Movies', 'Codec: VVC-x266 Future', 'all', 200);
+-- Movies strongly prefer efficient codecs while still allowing x264 fallback.
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best 1080p Movies', 'Codec: HEVC-x265 Preferred', 'all', 1400);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best 1080p Movies', 'Codec: AV1 Preferred', 'all', 1300);
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best 1080p Movies', 'Codec: VVC-x266 Future', 'all', 800);
 INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best 1080p Movies', 'Video: 10-bit SDR / Main 10 Fallback', 'all', 250);
 
 -- Dynamic range is the strongest video feature family.
@@ -133,6 +133,9 @@ FROM quality_profile_custom_formats WHERE quality_profile_name = 'Alex_C.T - Bes
 INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score)
 SELECT 'Alex_C.T - Catalog 480p-1080p Movies', custom_format_name, arr_type, score
 FROM quality_profile_custom_formats WHERE quality_profile_name = 'Alex_C.T - Best 1080p Movies';
+
+-- The strict 1080p movie lane can fall back to x264, but only under pressure.
+INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best 1080p Movies', 'Codec: x264-H264 Fallback or Penalty', 'all', -800);
 
 -- Strict-profile hard gates keep obvious bad matches out of the best-first lane.
 INSERT INTO quality_profile_custom_formats (quality_profile_name, custom_format_name, arr_type, score) VALUES ('Alex_C.T - Best 1080p Movies', 'Language: Block Other Languages', 'all', -50000);

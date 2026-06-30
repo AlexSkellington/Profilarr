@@ -77,6 +77,7 @@ EXPECTED_NEGATIVE_SCORES = {
     "Alex_C.T - Best 1080p Movies": {
         "Language: Block Other Languages": -50000,
         "Subtitles: Block Hardcoded-Burned-In": -50000,
+        "Codec: x264-H264 Fallback or Penalty": -800,
     },
     "Alex_C.T - Best 4K Movies": {
         "Language: Block Other Languages": -50000,
@@ -174,8 +175,8 @@ for key in ["name", "version", "description", "arr_types", "dependencies", "prof
     if key not in data:
         fail(f"pcd.json missing required key: {key}")
 
-if data.get("version") != "4.2.3":
-    fail("pcd.json version should be 4.2.3 for the bounded size-spec deploy fix")
+if data.get("version") != "4.2.4":
+    fail("pcd.json version should be 4.2.4 for the movie efficient-codec preference update")
 if sorted(data.get("arr_types", [])) != ["radarr", "sonarr"]:
     fail("pcd.json arr_types should be exactly ['radarr', 'sonarr']")
 if data.get("profilarr", {}).get("minimum_version") != "2.0.0":
@@ -416,12 +417,22 @@ if not errors:
     ]:
         if "1080p: UHD BluRay Source Bonus" in scores:
             fail(f"{profile} should keep source scoring centralized without a stacking UHD-source bonus")
-        if scores.get("Audio: Atmos Bonus", 0) <= scores.get("Codec: HEVC-x265 Preferred", 0):
+        if profile.endswith("Series") and scores.get("Audio: Atmos Bonus", 0) <= scores.get("Codec: HEVC-x265 Preferred", 0):
             fail(f"{profile} should value Atmos above a codec label")
         if scores.get("Audio: 7.1 Bonus", 0) <= scores.get("Audio: 6.1 Bonus", 0):
             fail(f"{profile} should prefer 7.1 over 6.1")
         if scores.get("Audio: 6.1 Bonus", 0) <= scores.get("Audio: 5.1 Surround Preferred", 0):
             fail(f"{profile} should prefer 6.1 over strong 5.1 credit")
+
+    expected_movie_codec_scores = {
+        "Codec: HEVC-x265 Preferred": 1400,
+        "Codec: AV1 Preferred": 1300,
+        "Codec: VVC-x266 Future": 800,
+        "Codec: x264-H264 Fallback or Penalty": -800,
+    }
+    for name, score in expected_movie_codec_scores.items():
+        if movie_scores.get(name) != score:
+            fail(f"Alex_C.T - Best 1080p Movies should score {name} as {score}")
 
     for profile in EXPECTED_PROFILES:
         scores = score_map(profile)

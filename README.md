@@ -77,17 +77,19 @@ Scoring priorities are:
    and weak 4K metadata.
 2. Dolby Vision with HDR fallback, HDR10+, and HDR10.
 3. Atmos, lossless audio, 7.1, 6.1, and strong 5.1 audio.
-4. Language, subtitles, codecs, release fixes, and movie editions as refiners.
+4. Movie codec pressure, then language, subtitles, release fixes, and movie editions as refiners.
 5. Catalog-only lower-resolution source refiners and modest movie size bonuses
    break close archival ties.
 
 The primary profiles use a minimum custom-format score of `0`. A usable release
 can download first only if it clears the strict blockers, then continue
 upgrading toward a keeper score of `10000`. Upgrade score increments are set to
-`1`, so any higher accepted score counts as a real improvement. Codec labels
-receive modest scores because HEVC or AV1 alone does not prove that an encode
-is good. Source order in the strict profiles comes from the quality ladder
-itself rather than extra BluRay-vs-WEB-DL score stacking.
+`1`, so any higher accepted score counts as a real improvement. Movie profiles
+strongly prefer HEVC/x265, AV1, and VVC/x266, while the strict 1080p movie lane
+penalizes x264/H.264/AVC without blocking it outright so it remains available as
+a fallback. Series profiles keep codec labels modest because series availability
+is more often x264-heavy. Source order in the strict profiles comes from the
+quality ladder itself rather than extra BluRay-vs-WEB-DL score stacking.
 
 ## Bitrate and size
 
